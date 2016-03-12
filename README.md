@@ -30,7 +30,6 @@ $router->addMiddleware('user/([a-z]+).*', function ($next, $name) {
         echo "<h1>Access denied!</h1>";
         return;
     }
-
     $next();
 });
 
