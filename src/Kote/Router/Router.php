@@ -35,9 +35,10 @@ class Router
      * @param string|array $methods
      * @param string $pathRegExp
      * @param callable $action
+     * @param mixed $data
      * @return Router
      */
-    public function add($methods, $pathRegExp, $action)
+    public function add($methods, $pathRegExp, $action, $data = null)
     {
         if (!is_array($methods)) {
             $methods = [$methods];
@@ -48,7 +49,7 @@ class Router
                 $this->routes[$method] = [];
             }
 
-            $this->routes[$method][] = ["~^$pathRegExp$~i", $action];
+            $this->routes[$method][] = ["~^$pathRegExp$~i", $action, $data];
         }
 
         return $this;
@@ -59,11 +60,12 @@ class Router
      *
      * @param string $pathRegExp
      * @param callable $action
+     * @param mixed $data
      * @return Router
      */
-    public function get($pathRegExp, $action)
+    public function get($pathRegExp, $action, $data = null)
     {
-        return $this->add(["HEAD", "GET"], $pathRegExp, $action);
+        return $this->add(["HEAD", "GET"], $pathRegExp, $action, $data);
     }
 
     /**
@@ -71,11 +73,12 @@ class Router
      *
      * @param string $pathRegExp
      * @param callable $action
+     * @param mixed $data
      * @return Router
      */
-    public function post($pathRegExp, $action)
+    public function post($pathRegExp, $action, $data = null)
     {
-        return $this->add("POST", $pathRegExp, $action);
+        return $this->add("POST", $pathRegExp, $action, $data);
     }
 
     /**
@@ -83,11 +86,12 @@ class Router
      *
      * @param string $pathRegExp
      * @param callable $action
+     * @param mixed $data
      * @return Router
      */
-    public function put($pathRegExp, $action)
+    public function put($pathRegExp, $action, $data = null)
     {
-        return $this->add("PUT", $pathRegExp, $action);
+        return $this->add("PUT", $pathRegExp, $action, $data);
     }
 
     /**
@@ -95,11 +99,12 @@ class Router
      *
      * @param string $pathRegExp
      * @param callable $action
+     * @param mixed $data
      * @return Router
      */
-    public function delete($pathRegExp, $action)
+    public function delete($pathRegExp, $action, $data = null)
     {
-        return $this->add("DELETE", $pathRegExp, $action);
+        return $this->add("DELETE", $pathRegExp, $action, $data);
     }
 
     /**
@@ -118,10 +123,10 @@ class Router
 
         $matching = [];
         foreach ($this->routes[$method] as $route) {
-            list ($regexp, $action) = $route;
+            list ($regexp, $action, $data) = $route;
             if (preg_match($regexp, $path, $args)) {
                 array_shift($args);
-                $matching[$regexp] = [$action, $args];
+                $matching[$regexp] = [$action, $args, $data];
             }
         }
 
@@ -132,9 +137,8 @@ class Router
                     $longestKey = $key;
                 }
             }
-            list ($action, $args) = $matching[$longestKey];
 
-            return $this->call($action, $args);
+            return $this->call(...$matching[$longestKey]);
         }
 
         throw new RouteNotFoundException("Document $path not found on this server.");
@@ -157,13 +161,14 @@ class Router
     /**
      * @param callable $action
      * @param array $args
+     * @param mixed $data
      * @return mixed
      * @throws RouterException
      */
-    private function call($action, array $args)
+    private function call($action, array $args, $data)
     {
         if (is_callable(self::$globalHandler)) {
-            return call_user_func(self::$globalHandler, $action, $args);
+            return call_user_func(self::$globalHandler, $action, $args, $data);
         }
 
         elseif (is_callable($action)) {
