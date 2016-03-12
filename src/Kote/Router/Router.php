@@ -13,6 +13,13 @@ class Router
     private $routes = [];
 
     /**
+     * List of registered middleware.
+     *
+     * @var array
+     */
+    private $middleware = [];
+
+    /**
      * Route handler which will be invoked when router find route matching request.
      *
      * @var callable
@@ -27,6 +34,20 @@ class Router
     public static function setGlobalHandler($globalHandler)
     {
         self::$globalHandler = $globalHandler;
+    }
+
+    /**
+     * Adds middleware to router.
+     *
+     * @param $pathRegExp
+     * @param $middleware
+     * @return Router
+     */
+    public function addMiddleware($pathRegExp, $middleware)
+    {
+        $this->middleware[] = ["~^$pathRegExp$~i", $middleware];
+
+        return $this;
     }
 
     /**
@@ -121,6 +142,48 @@ class Router
             throw new MethodNotImplementedException("Method $method not implemented.");
         }
 
+        $matching = $this->findMatchingRoutes($method, $path);
+
+        if (count($matching) > 0) {
+
+            $route = $this->getBestRoute($matching);
+            $middleware = $this->findMiddleware($path);
+
+            $action = $this->cascadeMiddlewareWithRoute($middleware, $route);
+
+            return $action();
+        }
+
+        throw new RouteNotFoundException("Document $path not found on this server.");
+    }
+
+    /**
+     * Cascades middleware list with route action.
+     *
+     * @param array $middleware
+     * @param callable $route
+     * @return callable
+     */
+    private function cascadeMiddlewareWithRoute($middleware, $route)
+    {
+        $actionInvoker = function () use ($route) { return $this->call(...$route); };
+
+        $action = array_reduce($middleware, function ($first, $second) {
+            return function () use ($first, $second) { return $second($first); };
+        }, $actionInvoker);
+
+        return $action;
+    }
+
+    /**
+     * Gets list of routes matching request.
+     *
+     * @param $method
+     * @param $path
+     * @return array
+     */
+    private function findMatchingRoutes($method, $path)
+    {
         $matching = [];
         foreach ($this->routes[$method] as $route) {
             list ($regexp, $action, $data) = $route;
@@ -130,18 +193,46 @@ class Router
             }
         }
 
-        if (count($matching) > 0) {
-            $longestKey = "";
-            foreach (array_keys($matching) as $key) {
-                if (strcmp($longestKey, $key) < 0) {
-                    $longestKey = $key;
-                }
-            }
+        return $matching;
+    }
 
-            return $this->call(...$matching[$longestKey]);
+    /**
+     * Gets best route from list or matching routes.
+     *
+     * @param $routes
+     * @return mixed
+     */
+    private function getBestRoute($routes)
+    {
+        $longestKey = "";
+        $longestKeyLength = 0;
+        foreach (array_keys($routes) as $key) {
+            if ($longestKeyLength < $len = strlen($key)) {
+                $longestKey = $key;
+                $longestKeyLength = $len;
+            }
         }
 
-        throw new RouteNotFoundException("Document $path not found on this server.");
+        return $routes[$longestKey];
+    }
+
+    /**
+     * Find middleware matching given path.
+     *
+     * @param $path
+     * @return array
+     */
+    private function findMiddleware($path)
+    {
+        $middleware = [];
+        foreach ($this->middleware as $item) {
+            list ($regexp, $action) = $item;
+            if (preg_match($regexp, $path)) {
+                $middleware[] = $action;
+            }
+        }
+
+        return $middleware;
     }
 
     /**
@@ -172,7 +263,7 @@ class Router
         }
 
         elseif (is_callable($action)) {
-            return $action(...$args);
+            return $action(...array_values($args));
         }
 
         throw new RouterException("No valid route handler found.");
