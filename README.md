@@ -36,14 +36,19 @@ $router->addMiddleware('user/([a-z]+)', function ($next, $name) {
 $router->run();
 ```
 
-You can also add global routing handler if you want to use your own handling service.
+You can also add global handlers for routes and middleware if you want to use your own handling service.
 
 Example:
    
 ```php
-\Kote\Router\Router::setGlobalHandler(function ($action, $args) {
+\Kote\Router\Router::setGlobalRouteHandler(function ($action, $args) {
     return container()->invoke($action, $args);
+});
+
+\Kote\Router\Router::setGlobalMiddlewareHandler(function ($action, $next, $args) {
+    container()->invoke($action, $args);
+    next();
 });
 ```
 
-This will invoke global handler on all requests instead of calling action.
+This will delegate all actions to global handlers.
