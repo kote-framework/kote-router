@@ -200,7 +200,7 @@ class Router
     }
 
     /**
-     * Gets best route from list or matching routes.
+     * Gets best route from list of matching routes.
      *
      * @param $routes
      * @return mixed
