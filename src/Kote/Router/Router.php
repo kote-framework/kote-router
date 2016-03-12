@@ -20,20 +20,37 @@ class Router
     private $middleware = [];
 
     /**
-     * Route handler which will be invoked when router find route matching request.
+     * Route handler which will be invoked when router found route matching request.
      *
-     * @var callable
+     * @var callable $globalRouteHandler
      */
-    private static $globalHandler;
+    private static $globalRouteHandler;
+
+    /**
+     * Middleware handler which will be invoked for all registered middleware.
+     *
+     * @var callable $globalMiddlewareHandler
+     */
+    private static $globalMiddlewareHandler;
 
     /**
      * Sets global route handler.
      *
-     * @param callable $globalHandler
+     * @param callable $globalRouteHandler
      */
-    public static function setGlobalHandler($globalHandler)
+    public static function setGlobalRouteHandler($globalRouteHandler)
     {
-        self::$globalHandler = $globalHandler;
+        self::$globalRouteHandler = $globalRouteHandler;
+    }
+
+    /**
+     * Sets global middleware handler.
+     *
+     * @param callable $globalMiddlewareHandler
+     */
+    public static function setGlobalMiddlewareHandler($globalMiddlewareHandler)
+    {
+        self::$globalMiddlewareHandler = $globalMiddlewareHandler;
     }
 
     /**
@@ -43,7 +60,7 @@ class Router
      * @param $middleware
      * @return Router
      */
-    public function addMiddleware($regexp, $middleware)
+    public function middleware($regexp, $middleware)
     {
         $this->middleware[] = ["~^$regexp$~i", $middleware];
 
@@ -165,12 +182,12 @@ class Router
      */
     private function cascadeMiddlewareWithRoute($middleware, $route)
     {
-        $actionInvoker = function () use ($route) { return $this->call(...$route); };
+        $actionInvoker = function () use ($route) { return $this->invokeRoute(...$route); };
 
         $action = array_reduce(array_reverse($middleware), function ($first, $second) {
             return function () use ($first, $second) {
                 list ($middleware, $args) = $second;
-                return $middleware($first, ...array_values($args));
+                return $this->invokeMiddleware($middleware, $first, $args);
             };
         }, $actionInvoker);
 
@@ -259,16 +276,36 @@ class Router
      * @return mixed
      * @throws RouterException
      */
-    private function call($action, array $args, $data)
+    private function invokeRoute($action, array $args, $data)
     {
-        if (is_callable(self::$globalHandler)) {
-            return call_user_func(self::$globalHandler, $action, $args, $data);
+        if (is_callable(self::$globalRouteHandler)) {
+            return call_user_func(self::$globalRouteHandler, $action, $args, $data);
         }
 
         elseif (is_callable($action)) {
             return $action(...array_values($args));
         }
 
-        throw new RouterException("No valid route handler found.");
+        throw new RouterException("Invalid route handler.");
+    }
+
+    /**
+     * @param callable $action
+     * @param callable $next
+     * @param array $args
+     * @return mixed
+     * @throws RouterException
+     */
+    private function invokeMiddleware($action, $next, array $args)
+    {
+        if (is_callable(self::$globalMiddlewareHandler)) {
+            return call_user_func(self::$globalMiddlewareHandler, $action, $next, $args);
+        }
+
+        elseif (is_callable($action)) {
+            return $action($next, ...array_values($args));
+        }
+
+        throw new RouterException("Invalid middleware handler.");
     }
 }
