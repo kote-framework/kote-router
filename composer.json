@@ -1,0 +1,20 @@
+{
+  "name": "kote/router",
+  "description": "Simple PHP HTTP Router based on Regular Expressions",
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Roman Lakhtadyr",
+      "email": "roman_gemini@ukr.net"
+    }
+  ],
+  "require": {
+    "php": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kote\\": "src/Kote/"
+    }
+  }
+}
