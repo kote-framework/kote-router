@@ -11,11 +11,11 @@ $router->get('/', function () {
     echo "Welcome Home!";
 });
 
-$router->get('user/(.+)', function ($name) {
+$router->get('user/([a-z]+)', function ($name) {
     echo "Hello, $name!";
 });
 
-$router->post('user/(.+)', function ($name) {
+$router->post('user/([a-z]+)', function ($name) {
     // user update code
 });
 
@@ -25,7 +25,7 @@ $router->addMiddleware('.*', function ($next) {
     $next();
 });
 
-$router->addMiddleware('user/([a-z]+).*', function ($next, $name) {
+$router->addMiddleware('user/([a-z]+)', function ($next, $name) {
     if ($name == "admin") {
         echo "<h1>Access denied!</h1>";
         return;
