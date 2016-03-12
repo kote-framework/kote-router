@@ -168,7 +168,7 @@ class Router
     {
         $actionInvoker = function () use ($route) { return $this->call(...$route); };
 
-        $action = array_reduce($middleware, function ($first, $second) {
+        $action = array_reduce(array_reverse($middleware), function ($first, $second) {
             return function () use ($first, $second) {
                 list ($middleware, $args) = $second;
                 return $middleware($first, ...array_values($args));
