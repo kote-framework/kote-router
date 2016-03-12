@@ -169,7 +169,10 @@ class Router
         $actionInvoker = function () use ($route) { return $this->call(...$route); };
 
         $action = array_reduce($middleware, function ($first, $second) {
-            return function () use ($first, $second) { return $second($first); };
+            return function () use ($first, $second) {
+                list ($middleware, $args) = $second;
+                return $middleware($first, ...array_values($args));
+            };
         }, $actionInvoker);
 
         return $action;
@@ -227,8 +230,9 @@ class Router
         $middleware = [];
         foreach ($this->middleware as $item) {
             list ($regexp, $action) = $item;
-            if (preg_match($regexp, $path)) {
-                $middleware[] = $action;
+            if (preg_match($regexp, $path, $args)) {
+                array_shift($args);
+                $middleware[] = [$action, $args];
             }
         }
 
