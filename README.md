@@ -1,7 +1,7 @@
 # kote/router
 Small PHP HTTP Router
 
-Usage:
+Example:
 
 ```php
 $router = new \Kote\Router\Router();
@@ -21,7 +21,9 @@ $router->get('user/(.+)/info', function ($name) {
 $router->run();
 ```
 
-You can also add global routing handler if you want to use your own handling service:
+You can also add global routing handler if you want to use your own handling service.
+
+Example:
    
 ```php
 \Kote\Router\Router::setGlobalHandler(function ($action, $args) {
