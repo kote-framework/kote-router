@@ -1,11 +1,12 @@
 # kote/router
-Small PHP HTTP Router
+Small HTTP router with middleware support.
 
 Example:
 
 ```php
 $router = new \Kote\Router\Router();
 
+// Define routes
 $router->get('/', function () {
     echo "Welcome Home!";
 });
@@ -16,6 +17,21 @@ $router->get('user/(.+)', function ($name) {
 
 $router->post('user/(.+)', function ($name) {
     // user update code
+});
+
+// Define middleware
+$router->addMiddleware('.*', function ($next) {
+    echo "<h3>This is global middleware</h3>";
+    $next();
+});
+
+$router->addMiddleware('user/([a-z]+).*', function ($next, $name) {
+    if ($name == "admin") {
+        echo "<h1>Access denied!</h1>";
+        return;
+    }
+
+    $next();
 });
 
 $router->run();
