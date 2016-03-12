@@ -39,13 +39,13 @@ class Router
     /**
      * Adds middleware to router.
      *
-     * @param $pathRegExp
+     * @param $regexp
      * @param $middleware
      * @return Router
      */
-    public function addMiddleware($pathRegExp, $middleware)
+    public function addMiddleware($regexp, $middleware)
     {
-        $this->middleware[] = ["~^$pathRegExp$~i", $middleware];
+        $this->middleware[] = ["~^$regexp$~i", $middleware];
 
         return $this;
     }
@@ -54,12 +54,12 @@ class Router
      * Adds route into routes list.
      *
      * @param string|array $methods
-     * @param string $pathRegExp
+     * @param string $regexp
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function add($methods, $pathRegExp, $action, $data = null)
+    public function add($methods, $regexp, $action, $data = null)
     {
         if (!is_array($methods)) {
             $methods = [$methods];
@@ -70,7 +70,7 @@ class Router
                 $this->routes[$method] = [];
             }
 
-            $this->routes[$method][] = ["~^$pathRegExp$~i", $action, $data];
+            $this->routes[$method][] = ["~^$regexp$~i", $action, $data];
         }
 
         return $this;
@@ -79,53 +79,53 @@ class Router
     /**
      * Adds route for GET method into routes list.
      *
-     * @param string $pathRegExp
+     * @param string $regexp
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function get($pathRegExp, $action, $data = null)
+    public function get($regexp, $action, $data = null)
     {
-        return $this->add(["HEAD", "GET"], $pathRegExp, $action, $data);
+        return $this->add(["HEAD", "GET"], $regexp, $action, $data);
     }
 
     /**
      * Adds route for POST method into routes list.
      *
-     * @param string $pathRegExp
+     * @param string $regexp
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function post($pathRegExp, $action, $data = null)
+    public function post($regexp, $action, $data = null)
     {
-        return $this->add("POST", $pathRegExp, $action, $data);
+        return $this->add("POST", $regexp, $action, $data);
     }
 
     /**
      * Adds route for PUT method into routes list.
      *
-     * @param string $pathRegExp
+     * @param string $regexp
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function put($pathRegExp, $action, $data = null)
+    public function put($regexp, $action, $data = null)
     {
-        return $this->add("PUT", $pathRegExp, $action, $data);
+        return $this->add("PUT", $regexp, $action, $data);
     }
 
     /**
      * Adds route for DELETE method into routes list.
      *
-     * @param string $pathRegExp
+     * @param string $regexp
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function delete($pathRegExp, $action, $data = null)
+    public function delete($regexp, $action, $data = null)
     {
-        return $this->add("DELETE", $pathRegExp, $action, $data);
+        return $this->add("DELETE", $regexp, $action, $data);
     }
 
     /**
@@ -144,17 +144,16 @@ class Router
 
         $matching = $this->findMatchingRoutes($method, $path);
 
-        if (count($matching) > 0) {
-
-            $route = $this->getBestRoute($matching);
-            $middleware = $this->findMiddleware($path);
-
-            $action = $this->cascadeMiddlewareWithRoute($middleware, $route);
-
-            return $action();
+        if (count($matching) == 0) {
+            throw new RouteNotFoundException("Document $path not found on this server.");
         }
 
-        throw new RouteNotFoundException("Document $path not found on this server.");
+        $route = $this->getBestRoute($matching);
+        $middleware = $this->findMiddleware($path);
+
+        $action = $this->cascadeMiddlewareWithRoute($middleware, $route);
+
+        return $action();
     }
 
     /**
