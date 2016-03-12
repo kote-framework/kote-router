@@ -14,8 +14,8 @@ $router->get('user/(.+)', function ($name) {
     echo "Hello, $name!";
 });
 
-$router->get('user/(.+)/info', function ($name) {
-    echo "Your info, $name!";
+$router->post('user/(.+)', function ($name) {
+    // user update code
 });
 
 $router->run();
