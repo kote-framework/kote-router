@@ -1,6 +1,6 @@
 {
   "name": "kote/router",
-  "description": "Simple PHP HTTP Router based on Regular Expressions",
+  "description": "Light router with middleware support.",
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
