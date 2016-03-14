@@ -1,4 +1,4 @@
-# kote/router
+# kote-router
 Small HTTP router with middleware support.
 
 Example:
