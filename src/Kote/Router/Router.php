@@ -227,7 +227,11 @@ class Router
 
         foreach ($args as $key => $arg) {
             if (is_int($previous)) {
-                $result[$key] = $arg;
+                if (is_int($key)) {
+                    $result[] = $arg;
+                } else {
+                    $result[$key] = $arg;
+                }
             }
             $previous = $key;
         }
