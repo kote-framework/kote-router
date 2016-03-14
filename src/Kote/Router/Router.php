@@ -225,10 +225,8 @@ class Router
         $result = [];
         $previous = null;
 
-        array_shift($args);
-
         foreach ($args as $key => $arg) {
-            if (!is_string($previous)) {
+            if (is_int($previous)) {
                 $result[$key] = $arg;
             }
             $previous = $key;
@@ -269,8 +267,7 @@ class Router
         foreach ($this->middleware as $item) {
             list ($regexp, $action) = $item;
             if (preg_match($regexp, $path, $args)) {
-                array_shift($args);
-                $middleware[] = [$action, $args];
+                $middleware[] = [$action, $this->filterArgs($args)];
             }
         }
 
