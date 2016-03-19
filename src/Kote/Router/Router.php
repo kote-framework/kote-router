@@ -282,8 +282,8 @@ class Router
             return call_user_func(self::$globalRouteHandler, $action, $args, $data);
         }
 
-        elseif (is_callable($action)) {
-            return $action(...array_values($args));
+        if (is_callable($action)) {
+            return call_user_func_array($action, array_values($args));
         }
 
         throw new RouterException("Invalid route handler.");
@@ -299,11 +299,13 @@ class Router
     private function invokeMiddleware($action, $next, array $args)
     {
         if (is_callable(self::$globalMiddlewareHandler)) {
-            return call_user_func(self::$globalMiddlewareHandler, $action, $next, $args);
+            return call_user_func(self::$globalMiddlewareHandler, $action, $args, $next);
         }
 
-        elseif (is_callable($action)) {
-            return $action($next, ...array_values($args));
+        if (is_callable($action)) {
+            $values = array_values($args);
+            $values[] = $next;
+            return call_user_func_array($action, $values);
         }
 
         throw new RouterException("Invalid middleware handler.");
