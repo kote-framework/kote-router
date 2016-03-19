@@ -1,4 +1,4 @@
-# kote/router
+# kote-router
 Small HTTP router with middleware support.
 
 Example:
@@ -20,12 +20,12 @@ $router->post('user/([a-z]+)', function ($name) {
 });
 
 // Define middleware
-$router->addMiddleware('.*', function ($next) {
+$router->middleware('.*', function ($next) {
     echo "<h3>This is global middleware</h3>";
     $next();
 });
 
-$router->addMiddleware('user/([a-z]+)', function ($next, $name) {
+$router->middleware('user/([a-z]+)', function ($next, $name) {
     if ($name == "admin") {
         echo "<h1>Access denied!</h1>";
         return;
@@ -46,8 +46,7 @@ Example:
 });
 
 \Kote\Router\Router::setGlobalMiddlewareHandler(function ($action, $next, $args) {
-    container()->invoke($action, $args);
-    next();
+    container()->invoke($action, $next, $args);
 });
 ```
 

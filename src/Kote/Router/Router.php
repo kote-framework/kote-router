@@ -207,12 +207,36 @@ class Router
         foreach ($this->routes[$method] as $route) {
             list ($regexp, $action, $data) = $route;
             if (preg_match($regexp, $path, $args)) {
-                array_shift($args);
-                $matching[$regexp] = [$action, $args, $data];
+                $matching[$regexp] = [$action, $this->filterArgs($args), $data];
             }
         }
 
         return $matching;
+    }
+
+    /**
+     * Filter arguments after regexp matching.
+     *
+     * @param array $args
+     * @return array
+     */
+    private function filterArgs(array $args)
+    {
+        $result = [];
+        $previous = null;
+
+        foreach ($args as $key => $arg) {
+            if (is_int($previous)) {
+                if (is_int($key)) {
+                    $result[] = $arg;
+                } else {
+                    $result[$key] = $arg;
+                }
+            }
+            $previous = $key;
+        }
+
+        return $result;
     }
 
     /**
@@ -247,8 +271,7 @@ class Router
         foreach ($this->middleware as $item) {
             list ($regexp, $action) = $item;
             if (preg_match($regexp, $path, $args)) {
-                array_shift($args);
-                $middleware[] = [$action, $args];
+                $middleware[] = [$action, $this->filterArgs($args)];
             }
         }
 
