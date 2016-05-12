@@ -102,7 +102,7 @@ class Router
      * @return void
      * @throws RouterException
      */
-    public function validateUrlPattern($regexp)
+    private function validateUrlPattern($regexp)
     {
         if (substr($regexp, 0, 1) == "/") {
             throw new RouterException("Url pattern must not begin with slash.");
