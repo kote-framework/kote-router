@@ -62,6 +62,8 @@ class Router
      */
     public function middleware($regexp, $middleware)
     {
+        $this->validateUrlPattern($regexp);
+        
         $this->middleware[] = ["~^$regexp$~i", $middleware];
 
         return $this;
@@ -78,6 +80,8 @@ class Router
      */
     public function add($methods, $regexp, $action, $data = null)
     {
+        $this->validateUrlPattern($regexp);
+        
         if (!is_array($methods)) {
             $methods = [$methods];
         }
@@ -91,6 +95,18 @@ class Router
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $regexp
+     * @return void
+     * @throws RouterException
+     */
+    public function validateUrlPattern($regexp)
+    {
+        if (substr($regexp, 0, 1) == "/") {
+            throw new RouterException("Url pattern must not begin with slash.");
+        }
     }
 
     /**
