@@ -104,8 +104,8 @@ class Router
      */
     private function validateUrlPattern($regexp)
     {
-        if (substr($regexp, 0, 1) == "/") {
-            throw new RouterException("Url pattern must not begin with slash.");
+        if ($regexp != "/" && substr($regexp, 0, 1) == "/") {
+            throw new RouterException("Url pattern must not start with slash.");
         }
     }
 
@@ -295,7 +295,7 @@ class Router
     }
 
     /**
-     * Finds action matching current HTTP request and invoke it.
+     * Find action matching current HTTP request and invoke it.
      *
      * @return mixed
      * @throws RouterException
