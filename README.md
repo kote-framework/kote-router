@@ -1,5 +1,5 @@
 # kote-router
-Small HTTP router with middleware support.
+Lightweight HTTP router with middleware support.
 
 Example:
 
