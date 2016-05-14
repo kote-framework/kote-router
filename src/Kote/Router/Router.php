@@ -220,6 +220,7 @@ class Router
     private function findMatchingRoutes($method, $path)
     {
         $matching = [];
+
         foreach ($this->routes[$method] as $route) {
             list ($regexp, $action, $data) = $route;
             if (preg_match($regexp, $path, $args)) {
@@ -265,6 +266,7 @@ class Router
     {
         $longestKey = "";
         $longestKeyLength = 0;
+
         foreach (array_keys($routes) as $key) {
             if ($longestKeyLength < $len = strlen($key)) {
                 $longestKey = $key;
