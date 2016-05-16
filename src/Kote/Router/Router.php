@@ -262,6 +262,7 @@ class Router
     private function findMiddleware($path)
     {
         $middleware = [];
+
         foreach ($this->middleware as $item) {
             list ($regexp, $action) = $item;
             if (preg_match($regexp, $path, $args)) {
