@@ -175,13 +175,12 @@ class Router
             throw new MethodNotImplementedException("Method $method not implemented.");
         }
 
-        $matching = $this->findMatchingRoutes($method, $path);
+        $route = $this->findMatchingRoute($method, $path);
 
-        if (count($matching) == 0) {
+        if (is_null($route)) {
             throw new RouteNotFoundException("Document $path not found on this server.");
         }
 
-        $route = $this->getBestRoute($matching);
         $middleware = $this->findMiddleware($path);
 
         $action = $this->cascadeMiddlewareWithRoute($middleware, $route);
@@ -211,24 +210,22 @@ class Router
     }
 
     /**
-     * Gets list of routes matching request.
+     * Gets route matching request.
      *
      * @param $method
      * @param $path
      * @return array
      */
-    private function findMatchingRoutes($method, $path)
+    private function findMatchingRoute($method, $path)
     {
-        $matching = [];
-
         foreach ($this->routes[$method] as $route) {
             list ($regexp, $action, $data) = $route;
             if (preg_match($regexp, $path, $args)) {
-                $matching[$regexp] = [$action, $this->filterArgs($args), $data];
+                return [$action, $this->filterArgs($args), $data];
             }
         }
 
-        return $matching;
+        return null;
     }
 
     /**
@@ -254,27 +251,6 @@ class Router
         }
 
         return $result;
-    }
-
-    /**
-     * Gets best route from list of matching routes.
-     *
-     * @param $routes
-     * @return mixed
-     */
-    private function getBestRoute($routes)
-    {
-        $longestKey = "";
-        $longestKeyLength = 0;
-
-        foreach (array_keys($routes) as $key) {
-            if ($longestKeyLength < $len = strlen($key)) {
-                $longestKey = $key;
-                $longestKeyLength = $len;
-            }
-        }
-
-        return $routes[$longestKey];
     }
 
     /**
