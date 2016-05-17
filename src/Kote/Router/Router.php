@@ -6,6 +6,13 @@ namespace Kote\Router;
 class Router
 {
     /**
+     * List of supported HTTP request methods.
+     *
+     * @var array
+     */
+    private static $availableMethods = ["HEAD", "GET", "POST", "PUT", "DELETE"];
+
+    /**
      * List of registered routes.
      *
      * @var array
@@ -159,6 +166,17 @@ class Router
     public function delete($regexp, $action, $data = null)
     {
         return $this->add("DELETE", $regexp, $action, $data);
+    }
+
+    /**
+     * @param string $regexp
+     * @param callable $action
+     * @param null $data
+     * @return Router
+     */
+    public function any($regexp, $action, $data = null)
+    {
+        return $this->add(self::$availableMethods, $regexp, $action, $data);
     }
 
     /**
