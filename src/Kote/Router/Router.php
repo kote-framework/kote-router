@@ -3,6 +3,8 @@
 namespace Kote\Router;
 
 
+use Kote\Util\Cascade;
+
 class Router
 {
     /**
@@ -201,9 +203,7 @@ class Router
 
         $middleware = $this->findMiddleware($path);
 
-        $action = $this->cascadeMiddlewareWithRoute($middleware, $route);
-
-        return $action();
+        return $this->cascadeMiddlewareWithRoute($middleware, $route);
     }
 
     /**
@@ -211,20 +211,20 @@ class Router
      *
      * @param array $middleware
      * @param callable $route
-     * @return callable
+     * @return mixed
      */
     private function cascadeMiddlewareWithRoute($middleware, $route)
     {
-        $actionInvoker = function () use ($route) { return $this->invokeRoute(...$route); };
+        $invokeRoute = function () use ($route) { return $this->invokeRoute(...$route); };
 
         $action = array_reduce(array_reverse($middleware), function ($first, $second) {
             return function () use ($first, $second) {
                 list ($middleware, $args) = $second;
                 return $this->invokeMiddleware($middleware, $first, $args);
             };
-        }, $actionInvoker);
+        }, $invokeRoute);
 
-        return $action;
+        return $action();
     }
 
     /**
