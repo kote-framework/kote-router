@@ -175,4 +175,14 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $router->handle('GET', 'foo-baz-bar/buzz/abc/dd');
     }
+
+    public function testGlobalRouteHandler()
+    {
+
+    }
+
+    public function testGlobalMiddlewareHandler()
+    {
+
+    }
 }
