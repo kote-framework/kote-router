@@ -3,8 +3,6 @@
 namespace Kote\Router;
 
 
-use Kote\Util\Cascade;
-
 class Router
 {
     /**
@@ -224,7 +222,7 @@ class Router
             };
         }, $invokeRoute);
 
-        return $action();
+        return call_user_func($action);
     }
 
     /**
@@ -345,5 +343,14 @@ class Router
         }
 
         throw new RouterException("Invalid middleware handler.");
+    }
+
+    /**
+     * Deletes all defined routes and middleware from router.
+     */
+    public function clear()
+    {
+        $this->routes = [];
+        $this->middleware = [];
     }
 }
