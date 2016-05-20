@@ -178,11 +178,33 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testGlobalRouteHandler()
     {
+        $router = new \Kote\Router\Router();
 
+        \Kote\Router\Router::setGlobalRouteHandler(function ($action) {
+            return 'global-' . $action();
+        });
+
+        $router->get('/', function () { return 'home'; });
+
+        $this->assertEquals('global-home', $router->handle('GET', '/'));
+
+        \Kote\Router\Router::setGlobalRouteHandler(null);
     }
 
     public function testGlobalMiddlewareHandler()
     {
+        $router = new \Kote\Router\Router();
 
+        \Kote\Router\Router::setGlobalMiddlewareHandler(function ($middleware, $args, $next) {
+            return 'global-' . $middleware($next);
+        });
+
+        $router->middleware('/', function ($next) { return 'middleware-' . $next(); });
+
+        $router->get('/', function () { return 'home'; });
+
+        $this->assertEquals('global-middleware-home', $router->handle('GET', '/'));
+
+        \Kote\Router\Router::setGlobalMiddlewareHandler(null);
     }
 }
