@@ -1,7 +1,7 @@
 # kote-router
 Lightweight HTTP router with middleware support.
 
-[![Code Climate](https://codeclimate.com/github/kote-framework/kote-router/badges/gpa.svg)](https://codeclimate.com/github/kote-framework/kote-router)
+[![Code Climate](https://codeclimate.com/github/kote-framework/kote-router/badges/gpa.svg)](https://codeclimate.com/github/kote-framework/kote-router) [![Issue Count](https://codeclimate.com/github/kote-framework/kote-router/badges/issue_count.svg)](https://codeclimate.com/github/kote-framework/kote-router)
 
 Example:
 
