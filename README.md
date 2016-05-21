@@ -48,7 +48,7 @@ Example:
 });
 
 \Kote\Router\Router::setGlobalMiddlewareHandler(function ($action, $next, $args) {
-    container()->invoke($action, $next, $args);
+    return container()->invoke($action, $next, $args);
 });
 ```
 
