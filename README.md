@@ -1,41 +1,35 @@
 # kote-router
-Lightweight HTTP router with middleware support.
-
 [![Code Climate](https://codeclimate.com/github/kote-framework/kote-router/badges/gpa.svg)](https://codeclimate.com/github/kote-framework/kote-router)    [![Issue Count](https://codeclimate.com/github/kote-framework/kote-router/badges/issue_count.svg)](https://codeclimate.com/github/kote-framework/kote-router)
 
-Example:
+Examples:
 
 ```php
 $router = new \Kote\Router\Router();
 
 // Define routes
-$router->get('/', function () {
-    echo "Welcome Home!";
-});
+$router->get('/', function () { return "Welcome Home!"; });
 
-$router->get('user/([a-z]+)', function ($name) {
-    echo "Hello, $name!";
-});
+$router->get('user/([a-z]+)', function ($name) { return "Hello, $name!"; });
 
-$router->post('user/([a-z]+)', function ($name) {
-    // user update code
-});
+$router->post('user/([a-z]+)', function ($name) { return "Hello from POST method!"; });
 
-// Define middleware
+// Add middleware
 $router->middleware('.*', function ($next) {
-    echo "<h3>This is global middleware</h3>";
-    $next();
+    $result  = "<h3>This is global middleware</h3>";
+    $result .= $next();
+    return $result;
 });
 
 $router->middleware('user/([a-z]+)', function ($next, $name) {
     if ($name == "admin") {
-        echo "<h1>Access denied!</h1>";
-        return;
+        return "<h1>Access denied!</h1>";
     }
-    $next();
+    return $next();
 });
 
-$router->run();
+$result = $router->run();
+
+echo $result;
 ```
 
 You can also add global handlers for routes and middleware if you want to use your own handling service.
@@ -44,12 +38,10 @@ Example:
    
 ```php
 \Kote\Router\Router::setGlobalRouteHandler(function ($action, $args) {
-    return container()->invoke($action, $args);
+    return myRouteHandler($action, $args);
 });
 
 \Kote\Router\Router::setGlobalMiddlewareHandler(function ($action, $next, $args) {
-    return container()->invoke($action, $next, $args);
+    return myMiddlewareHandler($action, $next, $args);
 });
 ```
-
-This will delegate all actions to global handlers.
