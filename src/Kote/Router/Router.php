@@ -189,10 +189,6 @@ class Router
      */
     public function handle($method, $path)
     {
-        if (!isset($this->routes[$method])) {
-            throw new MethodNotImplementedException("Method $method not implemented.");
-        }
-
         $route = $this->findMatchingRoute($method, $path);
 
         if (is_null($route)) {
