@@ -1,7 +1,7 @@
 # kote-router
 [![Code Climate](https://codeclimate.com/github/kote-framework/kote-router/badges/gpa.svg)](https://codeclimate.com/github/kote-framework/kote-router)    [![Issue Count](https://codeclimate.com/github/kote-framework/kote-router/badges/issue_count.svg)](https://codeclimate.com/github/kote-framework/kote-router)
 
-Examples:
+## Examples
 
 ```php
 $router = new \Kote\Router\Router();
@@ -32,9 +32,7 @@ $result = $router->run();
 echo $result;
 ```
 
-You can also add global handlers for routes and middleware if you want to use your own handling service.
-
-Example:
+## Global handlers example
    
 ```php
 \Kote\Router\Router::setGlobalRouteHandler(function ($action, $args) {
