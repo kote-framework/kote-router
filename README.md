@@ -1,6 +1,8 @@
 # kote-router
 Lightweight HTTP router with middleware support.
 
+[![Code Climate](https://codeclimate.com/github/kote-framework/kote-router/badges/gpa.svg)](https://codeclimate.com/github/kote-framework/kote-router)
+
 Example:
 
 ```php
