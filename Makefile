@@ -8,4 +8,4 @@ test:
 	composer exec phpunit -- --color tests
 
 lint:
-	composer exec 'phpcs --standard=PSR2 src tests'
+	composer exec 'phpcs --standard=PSR4 src tests'
