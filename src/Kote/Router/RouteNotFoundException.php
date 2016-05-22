@@ -8,7 +8,6 @@
 
 namespace Kote\Router;
 
-
 class RouteNotFoundException extends RouterException
 {
     //

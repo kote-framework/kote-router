@@ -2,7 +2,6 @@
 
 namespace Kote\Router;
 
-
 class Router
 {
     /**
