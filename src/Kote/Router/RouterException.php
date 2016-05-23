@@ -1,13 +1,16 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Roman
- * Date: 12.03.2016
- * Time: 11:24
- */
+
 
 namespace Kote\Router;
 
+/**
+ * Class RouterException
+ *
+ * @package  Kote\Router
+ * @author   Roman Gemini <roman_gemini@ukr.net>
+ * @license  MIT https://opensource.org/licenses/MIT
+ * @link     https://github.com/kote-framework/kote-router
+ */
 class RouterException extends \Exception
 {
     //

@@ -1,7 +1,16 @@
 <?php
 
+
 namespace Kote\Router;
 
+/**
+ * Class Router
+ *
+ * @package  Kote\Router
+ * @author   Roman Gemini <roman_gemini@ukr.net>
+ * @license  MIT https://opensource.org/licenses/MIT
+ * @link     https://github.com/kote-framework/kote-router
+ */
 class Router
 {
     /**
@@ -208,7 +217,9 @@ class Router
      */
     private function cascadeMiddlewareWithRoute($middleware, $route)
     {
-        $invokeRoute = function () use ($route) { return $this->invokeRoute(...$route); };
+        $invokeRoute = function () use ($route) {
+            return $this->invokeRoute(...$route);
+        };
 
         $action = array_reduce(array_reverse($middleware), function ($first, $second) {
             return function () use ($first, $second) {
@@ -342,6 +353,8 @@ class Router
 
     /**
      * Deletes all defined routes and middleware from router.
+     *
+     * @return void
      */
     public function clear()
     {
