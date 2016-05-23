@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Kote\\": "src/Kote/"
+      "Kote\\": ["src/Kote/", "tests/Kote/"]
     }
   }
 }

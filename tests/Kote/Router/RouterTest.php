@@ -1,29 +1,40 @@
 <?php
 
-/**
- * @author Roman Gemini <roman_gemini@ukr.net>
- * @date 19.05.16
- * @time 19:25
- */
-class RouterTest extends PHPUnit_Framework_TestCase
+namespace Kote\Router;
+
+class RouterTest extends \PHPUnit_Framework_TestCase
 {
     private function getRouter()
     {
-        return new \Kote\Router\Router();
+        return new Router();
     }
 
     private function getRouterWithTestRoutes()
     {
         $router = $this->getRouter();
 
-        $router->get('/',                   function () { return 'test-get'; });
-        $router->post('^test/post',         function () { return 'test-post'; });
-        $router->put('^test/put',           function () { return 'test-put'; });
-        $router->delete('^test/delete',     function () { return 'test-delete'; });
-        $router->any('^test/any',           function () { return 'test-any'; });
+        $router->get('/', function () {
+            return 'test-get';
+        });
+        $router->post('^test/post', function () {
+            return 'test-post';
+        });
+        $router->put('^test/put', function () {
+            return 'test-put';
+        });
+        $router->delete('^test/delete', function () {
+            return 'test-delete';
+        });
+        $router->any('^test/any', function () {
+            return 'test-any';
+        });
 
-        $router->get('foo',                 function () { return 'foo'; });
-        $router->get('bar/',                function () { return 'bar'; });
+        $router->get('foo', function () {
+            return 'foo';
+        });
+        $router->get('bar/', function () {
+            return 'bar';
+        });
 
         return $router;
     }
@@ -32,30 +43,30 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        $this->assertInstanceOf(\Kote\Router\Router::class, $router);
+        $this->assertInstanceOf(Router::class, $router);
     }
 
     public function testRouteHandling()
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $this->assertEquals('test-get',     $router->handle('GET', '/'));
-        $this->assertEquals('test-post',    $router->handle('POST', 'test/post'));
-        $this->assertEquals('test-put',     $router->handle('PUT', 'test/put'));
-        $this->assertEquals('test-delete',  $router->handle('DELETE', 'test/delete'));
+        $this->assertEquals('test-get', $router->handle('GET', '/'));
+        $this->assertEquals('test-post', $router->handle('POST', 'test/post'));
+        $this->assertEquals('test-put', $router->handle('PUT', 'test/put'));
+        $this->assertEquals('test-delete', $router->handle('DELETE', 'test/delete'));
 
-        $this->assertEquals('test-any',     $router->handle('GET', 'test/any'));
-        $this->assertEquals('test-any',     $router->handle('POST', 'test/any'));
-        $this->assertEquals('test-any',     $router->handle('PUT', 'test/any'));
-        $this->assertEquals('test-any',     $router->handle('DELETE', 'test/any'));
+        $this->assertEquals('test-any', $router->handle('GET', 'test/any'));
+        $this->assertEquals('test-any', $router->handle('POST', 'test/any'));
+        $this->assertEquals('test-any', $router->handle('PUT', 'test/any'));
+        $this->assertEquals('test-any', $router->handle('DELETE', 'test/any'));
     }
 
     public function testRouteSlashSuffix()
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $this->assertEquals('foo',          $router->handle('GET', 'foo'));
-        $this->assertEquals('bar',          $router->handle('GET', 'bar/'));
+        $this->assertEquals('foo', $router->handle('GET', 'foo'));
+        $this->assertEquals('bar', $router->handle('GET', 'bar/'));
     }
 
     /**
@@ -92,39 +103,38 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('^hello/(\w+)', function ($name) { return "Hello, $name"; });
+        $router->get('^hello/(\w+)', function ($name) {
+            return "Hello, $name";
+        });
 
         $this->assertEquals('Hello, Sam', $router->handle('GET', 'hello/Sam'));
         $this->assertEquals('Hello, Bill', $router->handle('GET', 'hello/Bill'));
-    }
-
-    public function testAddingMiddleware()
-    {
-        $router = $this->getRouter();
-
-        $router->middleware('/', function () {});
     }
 
     public function testMiddlewareFunction()
     {
         $router = $this->getRouter();
 
-        $router->get('.*', function () { return 'foo'; });
-
-        $this->assertEquals('foo', $router->handle('GET', '/'));
-
-        $router->middleware('^bar/.*', function ($next) {
+        $router->get('/', function () {
             return 'bar';
         });
 
-        $this->assertEquals('bar', $router->handle('GET', 'bar/baz'));
+        $this->assertEquals('bar', $router->handle('GET', '/'));
+
+        $router->middleware('/', function ($next) {
+            return 'foo' . $next();
+        });
+
+        $this->assertEquals('foobar', $router->handle('GET', '/'));
     }
 
     public function testMiddlewareRegExpParam()
     {
         $router = $this->getRouter();
 
-        $router->get('.*', function () { return 'foo'; });
+        $router->get('.*', function () {
+            return 'foo';
+        });
 
         $router->middleware('^profile/(.*)', function ($param, $next) {
             if ($param == 'admin') {
@@ -141,10 +151,16 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('/',               function () { return 'foo'; });
+        $middleware = function ($next) {
+            return $next();
+        };
+
+        $router->get('/', function () {
+            return 'foo';
+        });
 
         for ($i = 0; $i < 10; $i ++) {
-            $router->middleware('/',    function ($next) { return $next(); });
+            $router->middleware('/', $middleware);
         }
 
         $this->assertEquals('foo', $router->handle('GET', '/'));
@@ -154,15 +170,25 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('stuff/\w+', function () { return 'stuff'; });
-        $router->get('stuff/search', function () { return 'search'; });
+        $router->get('stuff/\w+', function () {
+            return 'stuff';
+        });
+
+        $router->get('stuff/search', function () {
+            return 'search';
+        });
 
         $this->assertEquals('stuff', $router->handle('GET', 'stuff/search'));
 
         $router->clear();
 
-        $router->get('stuff/search', function () { return 'search'; });
-        $router->get('stuff/\w+', function () { return 'stuff'; });
+        $router->get('stuff/search', function () {
+            return 'search';
+        });
+
+        $router->get('stuff/\w+', function () {
+            return 'stuff';
+        });
 
         $this->assertEquals('search', $router->handle('GET', 'stuff/search'));
     }
@@ -174,7 +200,9 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('foo-(\w+)-bar/(\w+)/abc/(\d+)$', function ($a, $b, $c) { return "$a-$b-$c"; });
+        $router->get('foo-(\w+)-bar/(\w+)/abc/(\d+)$', function ($a, $b, $c) {
+            return "$a-$b-$c";
+        });
 
         $this->assertEquals('baz-buzz-15', $router->handle('GET', 'foo-baz-bar/buzz/abc/15'));
 
@@ -185,31 +213,37 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        \Kote\Router\Router::setGlobalRouteHandler(function ($action) {
+        Router::setGlobalRouteHandler(function ($action) {
             return 'global-' . $action();
         });
 
-        $router->get('/', function () { return 'home'; });
+        $router->get('/', function () {
+            return 'home';
+        });
 
         $this->assertEquals('global-home', $router->handle('GET', '/'));
 
-        \Kote\Router\Router::setGlobalRouteHandler(null);
+        Router::setGlobalRouteHandler(null);
     }
 
     public function testGlobalMiddlewareHandler()
     {
         $router = $this->getRouter();
 
-        \Kote\Router\Router::setGlobalMiddlewareHandler(function ($middleware, $args, $next) {
+        Router::setGlobalMiddlewareHandler(function ($middleware, $args, $next) {
             return 'global-' . $middleware($next);
         });
 
-        $router->middleware('/', function ($next) { return 'middleware-' . $next(); });
+        $router->middleware('/', function ($next) {
+            return 'middleware-' . $next();
+        });
 
-        $router->get('/', function () { return 'home'; });
+        $router->get('/', function () {
+            return 'home';
+        });
 
         $this->assertEquals('global-middleware-home', $router->handle('GET', '/'));
 
-        \Kote\Router\Router::setGlobalMiddlewareHandler(null);
+        Router::setGlobalMiddlewareHandler(null);
     }
 }
