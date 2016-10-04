@@ -1,6 +1,7 @@
 # kote-router
-[![Build Status](https://travis-ci.org/kote-framework/kote-router.svg?branch=master)](https://travis-ci.org/kote-framework/kote-router)
-[![Code Climate](https://codeclimate.com/github/kote-framework/kote-router/badges/gpa.svg)](https://codeclimate.com/github/kote-framework/kote-router)    [![Issue Count](https://codeclimate.com/github/kote-framework/kote-router/badges/issue_count.svg)](https://codeclimate.com/github/kote-framework/kote-router)
+[![Build Status](https://travis-ci.org/nerd-framework/nerd-routing.svg?branch=master)](https://travis-ci.org/nerd-framework/nerd-routing)
+[![Coverage Status](https://coveralls.io/repos/github/nerd-framework/nerd-routing/badge.svg?branch=master)](https://coveralls.io/github/nerd-framework/nerd-routing?branch=master)
+
 
 ## Examples
 

@@ -214,7 +214,7 @@ class Router
 
         $action = array_reduce(array_reverse($middleware), function ($first, $second) {
             return function () use ($first, $second) {
-                list ($middleware, $args) = $second;
+                list($middleware, $args) = $second;
                 return $this->invokeMiddleware($middleware, $first, $args);
             };
         }, $invokeRoute);
@@ -232,7 +232,7 @@ class Router
     private function findMatchingRoute($method, $path)
     {
         foreach ($this->routes[$method] as $route) {
-            list ($regexp, $action, $data) = $route;
+            list($regexp, $action, $data) = $route;
             if (preg_match($regexp, $path, $args)) {
                 return [$action, $this->filterArgs($args), $data];
             }
@@ -277,7 +277,7 @@ class Router
         $middleware = [];
 
         foreach ($this->middleware as $item) {
-            list ($regexp, $action) = $item;
+            list($regexp, $action) = $item;
             if (preg_match($regexp, $path, $args)) {
                 $middleware[] = [$action, $this->filterArgs($args)];
             }
