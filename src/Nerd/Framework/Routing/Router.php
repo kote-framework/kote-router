@@ -111,7 +111,7 @@ class Router
     private function validateUrlPattern($regexp)
     {
         if ($regexp != "/" && substr($regexp, 0, 1) == "/") {
-            throw new RouterException("Url pattern must not start with slash.");
+            throw new RouterException("Url pattern must not begin with a slash.");
         }
     }
 
