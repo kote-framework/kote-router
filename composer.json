@@ -1,11 +1,11 @@
 {
-  "name": "kote/router",
-  "description": "Light router with middleware support.",
+  "name": "nerd-framework/nerd-routing",
+  "description": "Router used in Nerd Framework",
   "minimum-stability": "dev",
   "authors": [
     {
-      "name": "Roman Gemini",
-      "email": "roman_gemini@ukr.net"
+      "name": "Roman Lakhtadyr",
+      "email": "roman.lakhtadyr@gmail.com"
     }
   ],
   "require": {
@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Kote\\": ["src/Kote/", "tests/Kote/"]
+      "Nerd\\": ["src/Nerd/"]
     }
   }
 }

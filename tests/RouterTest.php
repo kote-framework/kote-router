@@ -1,8 +1,11 @@
 <?php
 
-namespace Kote\Router;
+namespace tests;
 
-class RouterTest extends \PHPUnit_Framework_TestCase
+use Nerd\Framework\Routing\Router;
+use PHPUnit\Framework\TestCase;
+
+class RouterTest extends TestCase
 {
     private function getRouter()
     {
@@ -70,7 +73,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Kote\Router\RouteNotFoundException
+     * @expectedException \Nerd\Framework\Routing\RouteNotFoundException
      */
     public function testDocumentNotFound()
     {
@@ -80,7 +83,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Kote\Router\RouteNotFoundException
+     * @expectedException \Nerd\Framework\Routing\RouteNotFoundException
      */
     public function testRouteSlashDoNotCompletion1()
     {
@@ -90,7 +93,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Kote\Router\RouteNotFoundException
+     * @expectedException \Nerd\Framework\Routing\RouteNotFoundException
      */
     public function testRouteSlashDoNotCompletion2()
     {
@@ -194,7 +197,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Kote\Router\RouteNotFoundException
+     * @expectedException \Nerd\Framework\Routing\RouteNotFoundException
      */
     public function testHardRoutePattern()
     {

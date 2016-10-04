@@ -1,5 +1,5 @@
 install:
-	composer install
+	composer install --prefer-dist
 
 autoload:
 	composer dump-autoload
