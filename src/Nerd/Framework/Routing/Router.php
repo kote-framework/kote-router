@@ -231,8 +231,7 @@ class Router
      */
     private function findMatchingRoute($method, $path)
     {
-        foreach ($this->routes[$method] as $route) {
-            list($regexp, $action, $data) = $route;
+        foreach ($this->routes[$method] as list($regexp, $action, $data)) {
             if (preg_match($regexp, $path, $args)) {
                 return [$action, filterArgs(array_slice($args, 1)), $data];
             }
@@ -253,8 +252,7 @@ class Router
     {
         $middleware = [];
 
-        foreach ($this->middleware as $item) {
-            list($regexp, $action) = $item;
+        foreach ($this->middleware as list($regexp, $action)) {
             if (preg_match($regexp, $path, $args)) {
                 $middleware[] = [$action, filterArgs(array_slice($args, 1))];
             }
