@@ -69,8 +69,10 @@ class Router
     public function middleware($regexp, $middleware)
     {
         $this->validateUrlPattern($regexp);
-        
-        $this->middleware[] = ["~^$regexp$~i", $middleware];
+
+        $preparedRoute = $this->prepareRoute($regexp);
+
+        $this->middleware[] = ["~^$preparedRoute$~i", $middleware];
 
         return $this;
     }
@@ -87,17 +89,19 @@ class Router
     public function add($methods, $regexp, $action, $data = null)
     {
         $this->validateUrlPattern($regexp);
-        
+
+        $updatedRoute = $this->prepareRoute($regexp);
+
         if (!is_array($methods)) {
             $methods = [$methods];
         }
 
         foreach ($methods as $method) {
-            if (!isset($this->routes[$method])) {
+            if (!array_key_exists($method, $this->routes)) {
                 $this->routes[$method] = [];
             }
 
-            $this->routes[$method][] = ["~^$regexp$~i", $action, $data];
+            $this->routes[$method][] = ["~^$updatedRoute$~i", $action, $data];
         }
 
         return $this;
@@ -113,6 +117,18 @@ class Router
         if ($regexp != "/" && substr($regexp, 0, 1) == "/") {
             throw new RouterException("Url pattern must not begin with a slash.");
         }
+    }
+
+    /**
+     * @param string $route
+     * @return string
+     */
+    private function prepareRoute($route)
+    {
+        $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $route);
+        $updatedRoute = preg_replace('/&([^\/]+)/', '(?P<$1>[\d]+)', $updatedRoute);
+        $updatedRoute = str_replace('/', '\/', $updatedRoute);
+        return $updatedRoute;
     }
 
     /**
@@ -231,6 +247,10 @@ class Router
      */
     private function findMatchingRoute($method, $path)
     {
+        if (!array_key_exists($method, $this->routes)) {
+            return null;
+        }
+
         foreach ($this->routes[$method] as list($regexp, $action, $data)) {
             if (preg_match($regexp, $path, $args)) {
                 return [$action, filterArgs(array_slice($args, 1)), $data];
@@ -261,21 +281,7 @@ class Router
         return $middleware;
     }
 
-    /**
-     * Find action matching current HTTP request and invoke it.
-     *
-     * @return mixed
-     * @throws RouterException
-     */
-    public function run()
-    {
-        $method = $_SERVER["REQUEST_METHOD"];
-        $path = ltrim(urldecode(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)), "/") ?: "/";
-
-        return $this->handle($method, $path);
-    }
-
-    /**
+     /**
      * @param callable $action
      * @param array $args
      * @param mixed $data

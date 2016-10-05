@@ -19,16 +19,16 @@ class RouterTest extends TestCase
         $router->get('/', function () {
             return 'test-get';
         });
-        $router->post('^test/post', function () {
+        $router->post('test/post', function () {
             return 'test-post';
         });
-        $router->put('^test/put', function () {
+        $router->put('test/put', function () {
             return 'test-put';
         });
-        $router->delete('^test/delete', function () {
+        $router->delete('test/delete', function () {
             return 'test-delete';
         });
-        $router->any('^test/any', function () {
+        $router->any('test/any', function () {
             return 'test-any';
         });
 
@@ -106,7 +106,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('^hello/(\w+)', function ($name) {
+        $router->get('^hello/:name', function ($name) {
             return "Hello, $name";
         });
 
@@ -139,7 +139,7 @@ class RouterTest extends TestCase
             return 'foo';
         });
 
-        $router->middleware('^profile/(.*)', function ($param, $next) {
+        $router->middleware('profile/:param', function ($param, $next) {
             if ($param == 'admin') {
                 return 'bar';
             }
@@ -173,7 +173,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('stuff/\w+', function () {
+        $router->get('stuff/:word', function () {
             return 'stuff';
         });
 
@@ -189,7 +189,7 @@ class RouterTest extends TestCase
             return 'search';
         });
 
-        $router->get('stuff/\w+', function () {
+        $router->get('stuff/:word', function () {
             return 'stuff';
         });
 
