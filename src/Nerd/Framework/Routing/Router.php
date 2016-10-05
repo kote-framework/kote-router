@@ -234,37 +234,14 @@ class Router
         foreach ($this->routes[$method] as $route) {
             list($regexp, $action, $data) = $route;
             if (preg_match($regexp, $path, $args)) {
-                return [$action, $this->filterArgs($args), $data];
+                return [$action, filterArgs(array_slice($args, 1)), $data];
             }
         }
 
         return null;
     }
 
-    /**
-     * Filter arguments after regexp matching.
-     *
-     * @param array $args
-     * @return array
-     */
-    private function filterArgs(array $args)
-    {
-        $result = [];
-        $previous = null;
 
-        foreach ($args as $key => $arg) {
-            if (is_int($previous)) {
-                if (is_int($key)) {
-                    $result[] = $arg;
-                } else {
-                    $result[$key] = $arg;
-                }
-            }
-            $previous = $key;
-        }
-
-        return $result;
-    }
 
     /**
      * Find middleware matching given path.
@@ -279,7 +256,7 @@ class Router
         foreach ($this->middleware as $item) {
             list($regexp, $action) = $item;
             if (preg_match($regexp, $path, $args)) {
-                $middleware[] = [$action, $this->filterArgs($args)];
+                $middleware[] = [$action, filterArgs(array_slice($args, 1))];
             }
         }
 
