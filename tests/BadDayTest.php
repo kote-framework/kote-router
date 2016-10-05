@@ -14,7 +14,6 @@ class BadDayTest extends TestCase
     {
         $router = new Router();
         $router->get('/somewhere', function () {
-
         });
     }
 
