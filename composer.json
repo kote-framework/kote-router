@@ -1,7 +1,6 @@
 {
   "name": "nerd-framework/nerd-routing",
   "description": "Router used in Nerd Framework",
-  "minimum-stability": "stable",
   "authors": [
     {
       "name": "Roman Lakhtadyr",
