@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "98cff5d6237be6ee1b3d06d4222b0473",
-    "content-hash": "01af098a55dc8f5e75ccbc8caee1bb1c",
+    "hash": "2110e23c53489938cbfc6ab7ac7c5d57",
+    "content-hash": "6ae563d7f88e663fbd9b860e622a3ebd",
     "packages": [
         {
             "name": "nerd-components/lambda",
@@ -50,6 +50,44 @@
             ],
             "description": "Lambda-function generator",
             "time": "2016-10-02 16:26:44"
+        },
+        {
+            "name": "nerd-framework/nerd-contracts",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nerd-framework/nerd-contracts.git",
+                "reference": "0a04815649b18275ca73df723210fba56b641a80"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nerd-framework/nerd-contracts/zipball/0a04815649b18275ca73df723210fba56b641a80",
+                "reference": "0a04815649b18275ca73df723210fba56b641a80",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.5",
+                "satooshi/php-coveralls": "^1.0",
+                "squizlabs/php_codesniffer": "^2.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Roman Lakhtadyr",
+                    "email": "roman.lakhtadyr@gmail.com"
+                }
+            ],
+            "description": "Contracts used in Nerd Framework",
+            "time": "2016-10-06 11:53:47"
         }
     ],
     "packages-dev": [
@@ -2025,7 +2063,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "nerd-framework/nerd-contracts": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

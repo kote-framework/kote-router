@@ -2,7 +2,10 @@
 
 namespace Nerd\Framework\Routing;
 
-class Router
+use Nerd\Framework\Http\RequestContract;
+use Nerd\Framework\Http\ResponseContract;
+
+class Router implements RouterContract
 {
     /**
      * List of supported HTTP request methods.
@@ -197,20 +200,19 @@ class Router
     /**
      * Finds action matching HTTP request $method and $path and invoke it.
      *
-     * @param string $method
-     * @param string $path
-     * @return mixed
+     * @param RequestContract $request
+     * @return ResponseContract
      * @throws RouterException
      */
-    public function handle($method, $path)
+    public function handle(RequestContract $request)
     {
-        $route = $this->findMatchingRoute($method, $path);
+        $route = $this->findMatchingRoute($request);
 
         if (is_null($route)) {
-            throw new RouteNotFoundException("Document $path not found on this server.");
+            throw new RouteNotFoundException("Document {$request->getPath()} not found on this server.");
         }
 
-        $middleware = $this->findMiddleware($path);
+        $middleware = $this->findMiddleware($request);
 
         return $this->cascadeMiddlewareWithRoute($middleware, $route);
     }
@@ -241,12 +243,14 @@ class Router
     /**
      * Gets route matching request.
      *
-     * @param $method
-     * @param $path
+     * @param RequestContract $request
      * @return array
      */
-    private function findMatchingRoute($method, $path)
+    private function findMatchingRoute(RequestContract $request)
     {
+        $method = $request->getMethod();
+        $path = $request->getPath();
+
         if (!array_key_exists($method, $this->routes)) {
             return null;
         }
@@ -265,11 +269,13 @@ class Router
     /**
      * Find middleware matching given path.
      *
-     * @param $path
+     * @param RequestContract $request
      * @return array
      */
-    private function findMiddleware($path)
+    private function findMiddleware(RequestContract $request)
     {
+        $path = $request->getPath();
+
         $middleware = [];
 
         foreach ($this->middleware as list($regexp, $action)) {

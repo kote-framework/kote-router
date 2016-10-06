@@ -4,6 +4,7 @@ namespace tests;
 
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
+use tests\fixtures\TestRequest;
 
 class BadDayTest extends TestCase
 {
@@ -23,8 +24,9 @@ class BadDayTest extends TestCase
     public function testInvalidRouteHandler()
     {
         $router = new Router();
+
         $router->get('/', null);
-        $router->handle('GET', '/');
+        $router->handle(TestRequest::make('GET', '/'));
     }
 
     /**
@@ -33,7 +35,7 @@ class BadDayTest extends TestCase
     public function testNoRoutes()
     {
         $router = new Router();
-        $router->handle('GET', '/');
+        $router->handle(TestRequest::make('GET', '/'));
     }
 
     /**
@@ -45,6 +47,6 @@ class BadDayTest extends TestCase
         $router->get('/', function () {
         });
         $router->middleware('.*', null);
-        $router->handle('GET', '/');
+        $router->handle(TestRequest::make('GET', '/'));
     }
 }
