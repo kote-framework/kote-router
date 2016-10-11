@@ -131,10 +131,26 @@ class Router implements RouterContract
      */
     private function prepareRoute($route)
     {
-        $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $route);
+        $updatedRoute = $this->quoteRoute($route);
+        $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $updatedRoute);
         $updatedRoute = preg_replace('/&([^\/]+)/', '(?P<$1>[\d]+)', $updatedRoute);
-        $updatedRoute = str_replace('/', '\/', $updatedRoute);
+
         return $updatedRoute;
+    }
+
+    /**
+     * Quote special symbols to ignore it by regular expression matcher.
+     *
+     * @param string $route
+     * @return string
+     */
+    private function quoteRoute($route)
+    {
+        $specialSymbols = '.\\/+*?[^]$(){}=!<>|-';
+
+        return implode(array_map(function ($char) use ($specialSymbols) {
+            return strpos($specialSymbols, $char) === false ? $char : '\\' . $char;
+        }, str_split($route)));
     }
 
     /**
@@ -266,8 +282,6 @@ class Router implements RouterContract
 
         return null;
     }
-
-
 
     /**
      * Find middleware matching given path.

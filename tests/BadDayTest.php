@@ -46,7 +46,7 @@ class BadDayTest extends TestCase
         $router = new Router();
         $router->get('/', function () {
         });
-        $router->middleware('.*', null);
+        $router->middleware('/', null);
         $router->handle(TestRequest::make('GET', '/'));
     }
 }

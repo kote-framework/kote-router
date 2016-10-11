@@ -107,7 +107,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('^hello/:name', function ($name) {
+        $router->get('hello/:name', function ($name) {
             return "Hello, $name";
         });
 
@@ -136,7 +136,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('.*', function () {
+        $router->get('profile/:param', function () {
             return 'foo';
         });
 
