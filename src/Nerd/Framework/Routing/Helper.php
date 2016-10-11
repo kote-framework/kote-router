@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: roman
- * Date: 10/5/16
- * Time: 9:28 AM
- */
 
-namespace Nerd\Framework\Routing;
+namespace Nerd\Framework\Routing\Helper;
 
 use function Nerd\Lambda\l;
 

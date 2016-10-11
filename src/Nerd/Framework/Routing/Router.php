@@ -5,6 +5,8 @@ namespace Nerd\Framework\Routing;
 use Nerd\Framework\Http\RequestContract;
 use Nerd\Framework\Http\ResponseContract;
 
+use function Nerd\Framework\Routing\Helper\filterArgs;
+
 class Router implements RouterContract
 {
     /**

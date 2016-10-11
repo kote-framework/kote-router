@@ -23,7 +23,7 @@
       "tests\\": "tests/"
     },
     "files": [
-      "src/Nerd/Framework/Routing.php"
+      "src/Nerd/Framework/Routing/Helper.php"
     ]
   }
 }

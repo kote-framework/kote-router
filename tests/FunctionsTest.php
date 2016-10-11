@@ -4,7 +4,7 @@ namespace tests;
 
 use PHPUnit\Framework\TestCase;
 
-use function Nerd\Framework\Routing\filterArgs;
+use function Nerd\Framework\Routing\Helper\filterArgs;
 
 class FunctionsTest extends TestCase
 {
