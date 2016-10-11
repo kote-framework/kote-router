@@ -43,27 +43,27 @@ class Router implements RouterContract
     private static $globalMiddlewareHandler;
 
     /**
-     * Sets global route handler.
+     * Set global route handler.
      *
      * @param callable $globalRouteHandler
      */
     public static function setGlobalRouteHandler($globalRouteHandler)
     {
-        self::$globalRouteHandler = $globalRouteHandler;
+        static::$globalRouteHandler = $globalRouteHandler;
     }
 
     /**
-     * Sets global middleware handler.
+     * Set global middleware handler.
      *
      * @param callable $globalMiddlewareHandler
      */
     public static function setGlobalMiddlewareHandler($globalMiddlewareHandler)
     {
-        self::$globalMiddlewareHandler = $globalMiddlewareHandler;
+        static::$globalMiddlewareHandler = $globalMiddlewareHandler;
     }
 
     /**
-     * Adds middleware to router.
+     * Add middleware to router.
      *
      * @param $regexp
      * @param $middleware
@@ -81,7 +81,7 @@ class Router implements RouterContract
     }
 
     /**
-     * Adds route into routes list.
+     * Add route into routes list.
      *
      * @param string|array $methods
      * @param string $regexp
@@ -95,6 +95,7 @@ class Router implements RouterContract
 
         $updatedRoute = $this->prepareRoute($regexp);
 
+        // todo: shame on me
         if (!is_array($methods)) {
             $methods = [$methods];
         }
@@ -135,7 +136,7 @@ class Router implements RouterContract
     }
 
     /**
-     * Adds route for GET method into routes list.
+     * Add route for GET method into routes list.
      *
      * @param string $regexp
      * @param callable $action
@@ -148,7 +149,7 @@ class Router implements RouterContract
     }
 
     /**
-     * Adds route for POST method into routes list.
+     * Add route for POST method into routes list.
      *
      * @param string $regexp
      * @param callable $action
@@ -161,7 +162,7 @@ class Router implements RouterContract
     }
 
     /**
-     * Adds route for PUT method into routes list.
+     * Add route for PUT method into routes list.
      *
      * @param string $regexp
      * @param callable $action
@@ -174,7 +175,7 @@ class Router implements RouterContract
     }
 
     /**
-     * Adds route for DELETE method into routes list.
+     * Add route for DELETE method into routes list.
      *
      * @param string $regexp
      * @param callable $action
@@ -198,7 +199,7 @@ class Router implements RouterContract
     }
 
     /**
-     * Finds action matching HTTP request $method and $path and invoke it.
+     * Find action matching HTTP request and invoke it.
      *
      * @param RequestContract $request
      * @return ResponseContract

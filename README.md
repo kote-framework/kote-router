@@ -3,6 +3,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/nerd-framework/nerd-routing/badge.svg?branch=master)](https://coveralls.io/github/nerd-framework/nerd-routing?branch=master)
 [![StyleCI](https://styleci.io/repos/53726387/shield?branch=master)](https://styleci.io/repos/53726387)
 
+Routing Service for Nerd Framework
+
 ## Examples
 
 ```php
@@ -11,9 +13,9 @@ $router = new \Nerd\Framework\Routing\Router();
 // Define routes
 $router->get('/', function () { return "Welcome Home!"; });
 
-$router->get('user/([a-z]+)', function ($name) { return "Hello, $name!"; });
+$router->get('user/:name)', function ($name) { return "Hello, $name!"; });
 
-$router->post('user/([a-z]+)', function ($name) { return "Hello from POST method!"; });
+$router->post('user/:name)', function ($name) { return "Hello from POST method!"; });
 
 // Add middleware
 $router->middleware('.*', function ($next) {
@@ -22,7 +24,7 @@ $router->middleware('.*', function ($next) {
     return $result;
 });
 
-$router->middleware('user/([a-z]+)', function ($next, $name) {
+$router->middleware('user/:name)', function ($next, $name) {
     if ($name == "admin") {
         return "<h1>Access denied!</h1>";
     }
@@ -34,7 +36,7 @@ $result = $router->run();
 echo $result;
 ```
 
-## Global handlers example
+### Global handlers example
    
 ```php
 \Kote\Router\Router::setGlobalRouteHandler(function ($action, $args) {
