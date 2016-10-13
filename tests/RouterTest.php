@@ -2,12 +2,22 @@
 
 namespace tests;
 
+use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
-use tests\fixtures\TestRequest;
 
 class RouterTest extends TestCase
 {
+    private function makeRequest($method, $path)
+    {
+        $request = $this->getMockBuilder(RequestContract::class)
+                        ->setMethods([])
+                        ->getMock();
+        $request->method('getMethod')->willReturn($method);
+        $request->method('getPath')->willReturn($path);
+        return $request;
+    }
+
     private function getRouter()
     {
         return new Router();
@@ -54,23 +64,23 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $this->assertEquals('test-get', $router->handle(TestRequest::make('GET', '/')));
-        $this->assertEquals('test-post', $router->handle(TestRequest::make('POST', 'test/post')));
-        $this->assertEquals('test-put', $router->handle(TestRequest::make('PUT', 'test/put')));
-        $this->assertEquals('test-delete', $router->handle(TestRequest::make('DELETE', 'test/delete')));
+        $this->assertEquals('test-get', $router->handle($this->makeRequest('GET', '/')));
+        $this->assertEquals('test-post', $router->handle($this->makeRequest('POST', 'test/post')));
+        $this->assertEquals('test-put', $router->handle($this->makeRequest('PUT', 'test/put')));
+        $this->assertEquals('test-delete', $router->handle($this->makeRequest('DELETE', 'test/delete')));
 
-        $this->assertEquals('test-any', $router->handle(TestRequest::make('GET', 'test/any')));
-        $this->assertEquals('test-any', $router->handle(TestRequest::make('POST', 'test/any')));
-        $this->assertEquals('test-any', $router->handle(TestRequest::make('PUT', 'test/any')));
-        $this->assertEquals('test-any', $router->handle(TestRequest::make('DELETE', 'test/any')));
+        $this->assertEquals('test-any', $router->handle($this->makeRequest('GET', 'test/any')));
+        $this->assertEquals('test-any', $router->handle($this->makeRequest('POST', 'test/any')));
+        $this->assertEquals('test-any', $router->handle($this->makeRequest('PUT', 'test/any')));
+        $this->assertEquals('test-any', $router->handle($this->makeRequest('DELETE', 'test/any')));
     }
 
     public function testRouteSlashSuffix()
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $this->assertEquals('foo', $router->handle(TestRequest::make('GET', 'foo')));
-        $this->assertEquals('bar', $router->handle(TestRequest::make('GET', 'bar/')));
+        $this->assertEquals('foo', $router->handle($this->makeRequest('GET', 'foo')));
+        $this->assertEquals('bar', $router->handle($this->makeRequest('GET', 'bar/')));
     }
 
     /**
@@ -80,7 +90,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $router->handle(TestRequest::make('GET', '404'));
+        $router->handle($this->makeRequest('GET', '404'));
     }
 
     /**
@@ -90,7 +100,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $router->handle(TestRequest::make('GET', 'foo/'));
+        $router->handle($this->makeRequest('GET', 'foo/'));
     }
 
     /**
@@ -100,7 +110,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouterWithTestRoutes();
 
-        $router->handle(TestRequest::make('GET', 'bar'));
+        $router->handle($this->makeRequest('GET', 'bar'));
     }
 
     public function testRouteParams()
@@ -111,8 +121,8 @@ class RouterTest extends TestCase
             return "Hello, $name";
         });
 
-        $this->assertEquals('Hello, Sam', $router->handle(TestRequest::make('GET', 'hello/Sam')));
-        $this->assertEquals('Hello, Bill', $router->handle(TestRequest::make('GET', 'hello/Bill')));
+        $this->assertEquals('Hello, Sam', $router->handle($this->makeRequest('GET', 'hello/Sam')));
+        $this->assertEquals('Hello, Bill', $router->handle($this->makeRequest('GET', 'hello/Bill')));
     }
 
     public function testMiddlewareFunction()
@@ -123,13 +133,13 @@ class RouterTest extends TestCase
             return 'bar';
         });
 
-        $this->assertEquals('bar', $router->handle(TestRequest::make('GET', '/')));
+        $this->assertEquals('bar', $router->handle($this->makeRequest('GET', '/')));
 
         $router->middleware('/', function ($next) {
             return 'foo' . $next();
         });
 
-        $this->assertEquals('foobar', $router->handle(TestRequest::make('GET', '/')));
+        $this->assertEquals('foobar', $router->handle($this->makeRequest('GET', '/')));
     }
 
     public function testMiddlewareRegExpParam()
@@ -147,8 +157,8 @@ class RouterTest extends TestCase
             return $next();
         });
 
-        $this->assertEquals('foo', $router->handle(TestRequest::make('GET', 'profile/john-smith')));
-        $this->assertEquals('bar', $router->handle(TestRequest::make('GET', 'profile/admin')));
+        $this->assertEquals('foo', $router->handle($this->makeRequest('GET', 'profile/john-smith')));
+        $this->assertEquals('bar', $router->handle($this->makeRequest('GET', 'profile/admin')));
     }
 
     public function testMiddlewareCascade()
@@ -167,7 +177,7 @@ class RouterTest extends TestCase
             $router->middleware('/', $middleware);
         }
 
-        $this->assertEquals('foo', $router->handle(TestRequest::make('GET', '/')));
+        $this->assertEquals('foo', $router->handle($this->makeRequest('GET', '/')));
     }
 
     public function testRoutesPriority()
@@ -182,7 +192,7 @@ class RouterTest extends TestCase
             return 'search';
         });
 
-        $this->assertEquals('stuff', $router->handle(TestRequest::make('GET', 'stuff/search')));
+        $this->assertEquals('stuff', $router->handle($this->makeRequest('GET', 'stuff/search')));
 
         $router->clear();
 
@@ -194,7 +204,7 @@ class RouterTest extends TestCase
             return 'stuff';
         });
 
-        $this->assertEquals('search', $router->handle(TestRequest::make('GET', 'stuff/search')));
+        $this->assertEquals('search', $router->handle($this->makeRequest('GET', 'stuff/search')));
     }
 
     /**
@@ -208,9 +218,9 @@ class RouterTest extends TestCase
             return "$a-$b-$c";
         });
 
-        $this->assertEquals('baz-buzz-15', $router->handle(TestRequest::make('GET', 'foo-baz-bar/buzz/abc/15')));
+        $this->assertEquals('baz-buzz-15', $router->handle($this->makeRequest('GET', 'foo-baz-bar/buzz/abc/15')));
 
-        $router->handle(TestRequest::make('GET', 'foo-baz-bar/buzz/abc/dd'));
+        $router->handle($this->makeRequest('GET', 'foo-baz-bar/buzz/abc/dd'));
     }
 
     public function testGlobalRouteHandler()
@@ -225,7 +235,7 @@ class RouterTest extends TestCase
             return 'home';
         });
 
-        $this->assertEquals('global-home', $router->handle(TestRequest::make('GET', '/')));
+        $this->assertEquals('global-home', $router->handle($this->makeRequest('GET', '/')));
 
         Router::setGlobalRouteHandler(null);
     }
@@ -246,8 +256,15 @@ class RouterTest extends TestCase
             return 'home';
         });
 
-        $this->assertEquals('global-middleware-home', $router->handle(TestRequest::make('GET', '/')));
+        $this->assertEquals('global-middleware-home', $router->handle($this->makeRequest('GET', '/')));
 
         Router::setGlobalMiddlewareHandler(null);
+    }
+
+    public function testFilterArgs()
+    {
+        $router = new Router();
+        $this->assertEquals([1, 2, 3], $router->filterArgs([1, 2, 3]));
+        $this->assertEquals(["a" => 1, "b" => 2], $router->filterArgs(["a" => 1, "b" => 2, 3, 4]));
     }
 }

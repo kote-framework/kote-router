@@ -2,10 +2,10 @@
 
 namespace Nerd\Framework\Routing;
 
-use Nerd\Framework\Http\RequestContract;
-use Nerd\Framework\Http\ResponseContract;
+use Nerd\Framework\Http\Request\RequestContract;
+use Nerd\Framework\Http\Response\ResponseContract;
 
-use function Nerd\Framework\Routing\Helper\filterArgs;
+use function Nerd\Lambda\l;
 
 class Router implements RouterContract
 {
@@ -276,7 +276,7 @@ class Router implements RouterContract
 
         foreach ($this->routes[$method] as list($regexp, $action, $data)) {
             if (preg_match($regexp, $path, $args)) {
-                return [$action, filterArgs(array_slice($args, 1)), $data];
+                return [$action, $this->filterArgs(array_slice($args, 1)), $data];
             }
         }
 
@@ -297,7 +297,7 @@ class Router implements RouterContract
 
         foreach ($this->middleware as list($regexp, $action)) {
             if (preg_match($regexp, $path, $args)) {
-                $middleware[] = [$action, filterArgs(array_slice($args, 1))];
+                $middleware[] = [$action, $this->filterArgs(array_slice($args, 1))];
             }
         }
 
@@ -355,5 +355,20 @@ class Router implements RouterContract
     {
         $this->routes = [];
         $this->middleware = [];
+    }
+
+    /**
+     * Filter arguments after regexp matching.
+     *
+     * @param array $args
+     * @return array
+     */
+    public function filterArgs(array $args)
+    {
+        $isNumeric = array_reduce(array_keys($args), l('$ && is_int($)'), true);
+
+        $filter = $isNumeric ? "is_int" : "is_string";
+
+        return array_filter($args, $filter, ARRAY_FILTER_USE_KEY);
     }
 }

@@ -1,6 +1,8 @@
 {
   "name": "nerd-framework/nerd-routing",
   "description": "Router used in Nerd Framework",
+  "minimal-stability": "dev",
+  "prefer-stable": true,
   "authors": [
     {
       "name": "Roman Lakhtadyr",
@@ -21,9 +23,6 @@
     "psr-4": {
       "": "src/",
       "tests\\": "tests/"
-    },
-    "files": [
-      "src/Nerd/Framework/Routing/Helper.php"
-    ]
+    }
   }
 }

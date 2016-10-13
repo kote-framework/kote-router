@@ -2,12 +2,22 @@
 
 namespace tests;
 
+use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
-use tests\fixtures\TestRequest;
 
 class BadDayTest extends TestCase
 {
+    private function makeRequest($method, $path)
+    {
+        $request = $this->getMockBuilder(RequestContract::class)
+                        ->setMethods([])
+                        ->getMock();
+        $request->method('getMethod')->willReturn($method);
+        $request->method('getPath')->willReturn($path);
+        return $request;
+    }
+
     /**
      * @expectedException \Nerd\Framework\Routing\RouterException
      */
@@ -24,9 +34,8 @@ class BadDayTest extends TestCase
     public function testInvalidRouteHandler()
     {
         $router = new Router();
-
         $router->get('/', null);
-        $router->handle(TestRequest::make('GET', '/'));
+        $router->handle($this->makeRequest('GET', '/'));
     }
 
     /**
@@ -35,7 +44,7 @@ class BadDayTest extends TestCase
     public function testNoRoutes()
     {
         $router = new Router();
-        $router->handle(TestRequest::make('GET', '/'));
+        $router->handle($this->makeRequest('GET', '/'));
     }
 
     /**
@@ -47,6 +56,6 @@ class BadDayTest extends TestCase
         $router->get('/', function () {
         });
         $router->middleware('/', null);
-        $router->handle(TestRequest::make('GET', '/'));
+        $router->handle($this->makeRequest('GET', '/'));
     }
 }
