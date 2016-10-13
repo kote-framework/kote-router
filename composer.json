@@ -1,6 +1,6 @@
 {
-  "name": "nerd-framework/nerd-routing",
-  "description": "Router used in Nerd Framework",
+  "name": "nerd-framework/nerd-router",
+  "description": "Router component for Nerd Framework",
   "minimal-stability": "dev",
   "prefer-stable": true,
   "authors": [
