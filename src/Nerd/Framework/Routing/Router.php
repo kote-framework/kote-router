@@ -156,7 +156,7 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function get($regexp, $action, $data = null): self
+    public function get(string $regexp, callable $action, $data = null)
     {
         return $this->add(["HEAD", "GET"], $regexp, $action, $data);
     }
@@ -169,7 +169,7 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function post($regexp, $action, $data = null): self
+    public function post(string $regexp, callable $action, $data = null)
     {
         return $this->add(["POST"], $regexp, $action, $data);
     }
@@ -182,7 +182,7 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function put($regexp, $action, $data = null): self
+    public function put(string $regexp, callable $action, $data = null)
     {
         return $this->add(["PUT"], $regexp, $action, $data);
     }
@@ -195,7 +195,7 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function delete($regexp, $action, $data = null): self
+    public function delete(string $regexp, callable $action, $data = null)
     {
         return $this->add(["DELETE"], $regexp, $action, $data);
     }
@@ -206,7 +206,7 @@ class Router implements RouterContract
      * @param null $data
      * @return Router
      */
-    public function any($regexp, $action, $data = null): self
+    public function any(string $regexp, callable $action, $data = null)
     {
         return $this->add(self::$availableMethods, $regexp, $action, $data);
     }
