@@ -49,7 +49,7 @@ class Router implements RouterContract
      *
      * @param callable $globalRouteHandler
      */
-    public static function setGlobalRouteHandler($globalRouteHandler)
+    public static function setGlobalRouteHandler(callable $globalRouteHandler = null)
     {
         static::$globalRouteHandler = $globalRouteHandler;
     }
@@ -59,7 +59,7 @@ class Router implements RouterContract
      *
      * @param callable $globalMiddlewareHandler
      */
-    public static function setGlobalMiddlewareHandler($globalMiddlewareHandler)
+    public static function setGlobalMiddlewareHandler(callable $globalMiddlewareHandler = null)
     {
         static::$globalMiddlewareHandler = $globalMiddlewareHandler;
     }
@@ -67,11 +67,11 @@ class Router implements RouterContract
     /**
      * Add middleware to router.
      *
-     * @param $regexp
-     * @param $middleware
+     * @param string $regexp
+     * @param callable $middleware
      * @return Router
      */
-    public function middleware($regexp, $middleware)
+    public function middleware(string $regexp, callable $middleware)
     {
         $this->validateUrlPattern($regexp);
 
@@ -91,16 +91,11 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function add($methods, $regexp, $action, $data = null)
+    public function add(array $methods, string $regexp, callable $action, $data = null)
     {
         $this->validateUrlPattern($regexp);
 
         $updatedRoute = $this->prepareRoute($regexp);
-
-        // todo: shame on me
-        if (!is_array($methods)) {
-            $methods = [$methods];
-        }
 
         foreach ($methods as $method) {
             if (!array_key_exists($method, $this->routes)) {
@@ -118,7 +113,7 @@ class Router implements RouterContract
      * @return void
      * @throws RouterException
      */
-    private function validateUrlPattern($regexp)
+    private function validateUrlPattern(string $regexp)
     {
         if ($regexp != "/" && substr($regexp, 0, 1) == "/") {
             throw new RouterException("Url pattern must not begin with a slash.");
@@ -129,7 +124,7 @@ class Router implements RouterContract
      * @param string $route
      * @return string
      */
-    private function prepareRoute($route)
+    private function prepareRoute(string $route): string
     {
         $updatedRoute = $this->quoteRoute($route);
         $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $updatedRoute);
@@ -144,7 +139,7 @@ class Router implements RouterContract
      * @param string $route
      * @return string
      */
-    private function quoteRoute($route)
+    private function quoteRoute(string $route): string
     {
         $specialSymbols = '.\\/+*?[^]$(){}=!<>|-';
 
@@ -161,7 +156,7 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function get($regexp, $action, $data = null)
+    public function get($regexp, $action, $data = null): self
     {
         return $this->add(["HEAD", "GET"], $regexp, $action, $data);
     }
@@ -174,9 +169,9 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function post($regexp, $action, $data = null)
+    public function post($regexp, $action, $data = null): self
     {
-        return $this->add("POST", $regexp, $action, $data);
+        return $this->add(["POST"], $regexp, $action, $data);
     }
 
     /**
@@ -187,9 +182,9 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function put($regexp, $action, $data = null)
+    public function put($regexp, $action, $data = null): self
     {
-        return $this->add("PUT", $regexp, $action, $data);
+        return $this->add(["PUT"], $regexp, $action, $data);
     }
 
     /**
@@ -200,9 +195,9 @@ class Router implements RouterContract
      * @param mixed $data
      * @return Router
      */
-    public function delete($regexp, $action, $data = null)
+    public function delete($regexp, $action, $data = null): self
     {
-        return $this->add("DELETE", $regexp, $action, $data);
+        return $this->add(["DELETE"], $regexp, $action, $data);
     }
 
     /**
@@ -211,7 +206,7 @@ class Router implements RouterContract
      * @param null $data
      * @return Router
      */
-    public function any($regexp, $action, $data = null)
+    public function any($regexp, $action, $data = null): self
     {
         return $this->add(self::$availableMethods, $regexp, $action, $data);
     }
@@ -220,7 +215,7 @@ class Router implements RouterContract
      * Find action matching HTTP request and invoke it.
      *
      * @param RequestContract $request
-     * @return ResponseContract
+     * @return mixed
      * @throws RouterException
      */
     public function handle(RequestContract $request)
@@ -240,10 +235,10 @@ class Router implements RouterContract
      * Cascades middleware list with route action.
      *
      * @param array $middleware
-     * @param callable $route
+     * @param array $route
      * @return mixed
      */
-    private function cascadeMiddlewareWithRoute($middleware, $route)
+    private function cascadeMiddlewareWithRoute(array $middleware, array $route)
     {
         $invokeRoute = function () use ($route) {
             return $this->invokeRoute(...$route);
@@ -311,17 +306,13 @@ class Router implements RouterContract
      * @return mixed
      * @throws RouterException
      */
-    private function invokeRoute($action, array $args, $data)
+    private function invokeRoute(callable $action, array $args, $data)
     {
         if (is_callable(self::$globalRouteHandler)) {
             return call_user_func(self::$globalRouteHandler, $action, $args, $data);
         }
 
-        if (is_callable($action)) {
-            return call_user_func_array($action, array_values($args));
-        }
-
-        throw new RouterException("Invalid route handler.");
+        return call_user_func_array($action, array_values($args));
     }
 
     /**
@@ -337,13 +328,10 @@ class Router implements RouterContract
             return call_user_func(self::$globalMiddlewareHandler, $action, $args, $next);
         }
 
-        if (is_callable($action)) {
-            $values = array_values($args);
-            $values[] = $next;
-            return call_user_func_array($action, $values);
-        }
+        $values = array_values($args);
+        $values[] = $next;
 
-        throw new RouterException("Invalid middleware handler.");
+        return call_user_func_array($action, $values);
     }
 
     /**
@@ -363,7 +351,7 @@ class Router implements RouterContract
      * @param array $args
      * @return array
      */
-    public function filterArgs(array $args)
+    public function filterArgs(array $args): array
     {
         $isNumeric = array_reduce(array_keys($args), l('$ && is_int($)'), true);
 

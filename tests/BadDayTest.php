@@ -31,31 +31,9 @@ class BadDayTest extends TestCase
     /**
      * @expectedException \Nerd\Framework\Routing\RouterException
      */
-    public function testInvalidRouteHandler()
-    {
-        $router = new Router();
-        $router->get('/', null);
-        $router->handle($this->makeRequest('GET', '/'));
-    }
-
-    /**
-     * @expectedException \Nerd\Framework\Routing\RouterException
-     */
     public function testNoRoutes()
     {
         $router = new Router();
-        $router->handle($this->makeRequest('GET', '/'));
-    }
-
-    /**
-     * @expectedException \Nerd\Framework\Routing\RouterException
-     */
-    public function testInvalidMiddlewareHandler()
-    {
-        $router = new Router();
-        $router->get('/', function () {
-        });
-        $router->middleware('/', null);
         $router->handle($this->makeRequest('GET', '/'));
     }
 }
