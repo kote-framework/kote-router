@@ -68,16 +68,12 @@ trait RoutePatternMatcherTrait
 
     /**
      * @param string $route
-     * @return array
+     * @return array|null
      * @throws RouterException
      */
-    public function parameters(string $route): array
+    public function parameters(string $route)
     {
         $this->match($route);
-
-        if (!$this->isMatched($route)) {
-            throw new RouterException("Can't extract parameters from unmatched route.");
-        }
 
         return $this->cache[$route];
     }

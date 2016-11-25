@@ -17,7 +17,6 @@ class PlainRouteMatcher extends RegexRouteMatcher
     {
         $quotedRoute    = $this->escapeSpecialSymbols($route);
         $convertedRoute = $this->convertParameters($quotedRoute);
-
         parent::__construct($convertedRoute);
     }
 
@@ -27,7 +26,7 @@ class PlainRouteMatcher extends RegexRouteMatcher
      */
     private function escapeSpecialSymbols(string $route): string
     {
-        $specialSymbols = '.\\+*?[^]$~(){}=!<>|-';
+        $specialSymbols = '.\\/+*?[^]$~(){}=!<>|-';
 
         return implode('', array_map(function ($char) use ($specialSymbols) {
             return strpos($specialSymbols, $char) === false ? $char : '\\' . $char;
@@ -40,8 +39,8 @@ class PlainRouteMatcher extends RegexRouteMatcher
      */
     private function convertParameters(string $route): string
     {
-        $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $route);
-        $updatedRoute = preg_replace('/&([^\/]+)/', '(?P<$1>[\d]+)', $updatedRoute);
+        $updatedRoute = preg_replace('/:([\w-_]+)/', '(?P<$1>.+?)', $route);
+        $updatedRoute = preg_replace('/&([\w-_]+)/', '(?P<$1>[\d]+)', $updatedRoute);
 
         return $updatedRoute;
     }

@@ -47,7 +47,7 @@ class RegexRouteMatcher implements RoutePatternMatcherContract
         }
 
         if (preg_match($this->route, $route, $args)) {
-            $this->saveToCache($route, array_slice($this->filterArgs($args), 1));
+            $this->saveToCache($route, $this->filterArgs(array_slice($args, 1)));
         } else {
             $this->saveToCache($route, null);
         }
