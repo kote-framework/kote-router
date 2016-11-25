@@ -3,7 +3,6 @@
 namespace Nerd\Framework\Routing;
 
 use Nerd\Framework\Http\Request\RequestContract;
-use Nerd\Framework\Http\Response\ResponseContract;
 
 use function Nerd\Lambda\l;
 
