@@ -6,9 +6,9 @@
  * Time: 5:35 PM
  */
 
-namespace Nerd\Framework\Routing\Matcher;
+namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
-interface RouteMatcher
+interface RoutePatternMatcher
 {
     public function matches(string $route): boolean;
 

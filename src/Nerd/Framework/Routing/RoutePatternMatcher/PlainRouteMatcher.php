@@ -6,7 +6,7 @@
  * Time: 5:45 PM
  */
 
-namespace Nerd\Framework\Routing\Matcher;
+namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
 class PlainRouteMatcher extends RegexRouteMatcher
 {
@@ -17,9 +17,8 @@ class PlainRouteMatcher extends RegexRouteMatcher
     {
         $quotedRoute = $this->quoteRoute($route);
         $convertedRoute = $this->convertArguments($quotedRoute);
-        $normalizedRegexpRoute = "~^$convertedRoute$~i";
 
-        parent::__construct($normalizedRegexpRoute);
+        parent::__construct($convertedRoute);
     }
 
     private function quoteRoute(string $route): string

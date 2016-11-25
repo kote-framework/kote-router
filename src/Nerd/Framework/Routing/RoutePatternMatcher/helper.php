@@ -6,22 +6,22 @@
  * Time: 5:41 PM
  */
 
-namespace Nerd\Framework\Routing\Matcher;
+namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
 /**
  * @param string $route
- * @return RouteMatcher
+ * @return RoutePatternMatcher
  */
-function regex(string $route): RouteMatcher
+function regex(string $route): RoutePatternMatcher
 {
     return new RegexRouteMatcher($route);
 }
 
 /**
  * @param string $route
- * @return RouteMatcher
+ * @return RoutePatternMatcher
  */
-function plain(string $route): RouteMatcher
+function plain(string $route): RoutePatternMatcher
 {
     return new PlainRouteMatcher($route);
 }

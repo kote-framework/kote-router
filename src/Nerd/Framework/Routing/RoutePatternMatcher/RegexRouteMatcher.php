@@ -6,10 +6,10 @@
  * Time: 5:37 PM
  */
 
-namespace Nerd\Framework\Routing\Matcher;
+namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
 
-class RegexRouteMatcher implements RouteMatcher
+class RegexRouteMatcher implements RoutePatternMatcher
 {
     private $route;
 
@@ -19,7 +19,7 @@ class RegexRouteMatcher implements RouteMatcher
      */
     public function __construct(string $route)
     {
-        $this->route = $route;
+        $this->route = "~^$route$~";
     }
 
     /**
@@ -40,5 +40,13 @@ class RegexRouteMatcher implements RouteMatcher
         preg_match($this->route, $route, $args);
 
         return array_slice($args, 1);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->route;
     }
 }

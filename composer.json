@@ -21,7 +21,7 @@
   },
   "autoload": {
     "files": [
-      "src/Nerd/Framework/Routing/Matcher/Matcher.php"
+      "src/Nerd/Framework/Routing/RoutePatternMatcher/helper.php"
     ],
     "psr-4": {
       "": "src/",
