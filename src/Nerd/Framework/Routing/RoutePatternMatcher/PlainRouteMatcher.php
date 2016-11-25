@@ -27,7 +27,7 @@ class PlainRouteMatcher extends RegexRouteMatcher
      */
     private function escapeSpecialSymbols(string $route): string
     {
-        $specialSymbols = '.\\/+*?[^]$(){}=!<>|-';
+        $specialSymbols = '.\\+*?[^]$~(){}=!<>|-';
 
         return implode('', array_map(function ($char) use ($specialSymbols) {
             return strpos($specialSymbols, $char) === false ? $char : '\\' . $char;

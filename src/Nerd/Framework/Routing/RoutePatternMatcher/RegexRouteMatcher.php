@@ -8,9 +8,9 @@
 
 namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
-use Nerd\Framework\Routing\RouterException;
+use function Nerd\Lambda\l;
 
-class RegexRouteMatcher implements RoutePatternMatcher
+class RegexRouteMatcher implements RoutePatternMatcherContract
 {
     use RoutePatternMatcherTrait;
 
@@ -25,7 +25,7 @@ class RegexRouteMatcher implements RoutePatternMatcher
      */
     public function __construct(string $route)
     {
-        $this->route = "/^$route$/";
+        $this->route = "~^$route$~";
     }
 
     /**
@@ -47,9 +47,24 @@ class RegexRouteMatcher implements RoutePatternMatcher
         }
 
         if (preg_match($this->route, $route, $args)) {
-            $this->saveToCache($route, array_slice($args, 1));
+            $this->saveToCache($route, array_slice($this->filterArgs($args), 1));
         } else {
             $this->saveToCache($route, null);
         }
+    }
+
+    /**
+     * Filter arguments after regexp matching.
+     *
+     * @param array $args
+     * @return array
+     */
+    private function filterArgs(array $args): array
+    {
+        $isNumeric = array_reduce(array_keys($args), l('$ && is_int($)'), true);
+
+        $filter = $isNumeric ? "is_int" : "is_string";
+
+        return array_filter($args, $filter, ARRAY_FILTER_USE_KEY);
     }
 }

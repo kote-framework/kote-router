@@ -8,29 +8,31 @@
 
 namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
+use Nerd\Framework\Routing\RoutePatternMatcher\RoutePatternMatcherContract as Matcher;
+
 /**
  * @param string $route
- * @return RoutePatternMatcher
+ * @return Matcher
  */
-function regex(string $route): RoutePatternMatcher
+function regex(string $route): Matcher
 {
     return new RegexRouteMatcher($route);
 }
 
 /**
  * @param string $route
- * @return RoutePatternMatcher
+ * @return Matcher
  */
-function plain(string $route): RoutePatternMatcher
+function plain(string $route): Matcher
 {
     return new PlainRouteMatcher($route);
 }
 
 /**
  * @param string $route
- * @return RoutePatternMatcher
+ * @return Matcher
  */
-function fast(string $route): RoutePatternMatcher
+function fast(string $route): Matcher
 {
-    return null;
+    return new FastRouteMatcher($route);
 }

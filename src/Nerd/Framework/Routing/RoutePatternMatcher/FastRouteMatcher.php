@@ -8,9 +8,7 @@
 
 namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
-use Nerd\Framework\Routing\RouterException;
-
-class FastRouteMatcher implements RoutePatternMatcher
+class FastRouteMatcher implements RoutePatternMatcherContract
 {
     use RoutePatternMatcherTrait;
 

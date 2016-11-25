@@ -3,8 +3,7 @@
 namespace Nerd\Framework\Routing;
 
 use Nerd\Framework\Http\Request\RequestContract;
-
-use function Nerd\Lambda\l;
+use Nerd\Framework\Routing\RoutePatternMatcher\RoutePatternMatcherContract as Matcher;
 
 class Router implements RouterContract
 {
@@ -66,17 +65,13 @@ class Router implements RouterContract
     /**
      * Add middleware to router.
      *
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $middleware
      * @return Router
      */
-    public function middleware(string $regexp, callable $middleware)
+    public function middleware(Matcher $matcher, callable $middleware)
     {
-        $this->validateUrlPattern($regexp);
-
-        $preparedRoute = $this->prepareRoute($regexp);
-
-        $this->middleware[] = ["~^$preparedRoute$~i", $middleware];
+        $this->middleware[] = [$matcher, $middleware];
 
         return $this;
     }
@@ -85,129 +80,85 @@ class Router implements RouterContract
      * Add route into routes list.
      *
      * @param string|array $methods
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function add(array $methods, string $regexp, callable $action, $data = null)
+    public function add(array $methods, Matcher $matcher, callable $action, $data = null)
     {
-        $this->validateUrlPattern($regexp);
-
-        $updatedRoute = $this->prepareRoute($regexp);
-
         foreach ($methods as $method) {
             if (!array_key_exists($method, $this->routes)) {
                 $this->routes[$method] = [];
             }
 
-            $this->routes[$method][] = ["~^$updatedRoute$~i", $action, $data];
+            $this->routes[$method][] = [$matcher, $action, $data];
         }
 
         return $this;
     }
 
     /**
-     * @param string $regexp
-     * @return void
-     * @throws RouterException
-     */
-    private function validateUrlPattern(string $regexp)
-    {
-        if ($regexp != "/" && substr($regexp, 0, 1) == "/") {
-            throw new RouterException("Url pattern must not begin with a slash.");
-        }
-    }
-
-    /**
-     * @param string $route
-     * @return string
-     */
-    private function prepareRoute(string $route): string
-    {
-        $updatedRoute = $this->quoteRoute($route);
-        $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $updatedRoute);
-        $updatedRoute = preg_replace('/&([^\/]+)/', '(?P<$1>[\d]+)', $updatedRoute);
-
-        return $updatedRoute;
-    }
-
-    /**
-     * Quote special symbols to ignore it by regular expression matcher.
-     *
-     * @param string $route
-     * @return string
-     */
-    private function quoteRoute(string $route): string
-    {
-        $specialSymbols = '.\\/+*?[^]$(){}=!<>|-';
-
-        return implode(array_map(function ($char) use ($specialSymbols) {
-            return strpos($specialSymbols, $char) === false ? $char : '\\' . $char;
-        }, str_split($route)));
-    }
-
-    /**
      * Add route for GET method into routes list.
      *
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function get(string $regexp, callable $action, $data = null)
+    public function get(Matcher $matcher, callable $action, $data = null)
     {
-        return $this->add(["HEAD", "GET"], $regexp, $action, $data);
+        return $this->add(["HEAD", "GET"], $matcher, $action, $data);
     }
 
     /**
      * Add route for POST method into routes list.
      *
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function post(string $regexp, callable $action, $data = null)
+    public function post(Matcher $matcher, callable $action, $data = null)
     {
-        return $this->add(["POST"], $regexp, $action, $data);
+        return $this->add(["POST"], $matcher, $action, $data);
     }
 
     /**
      * Add route for PUT method into routes list.
      *
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function put(string $regexp, callable $action, $data = null)
+    public function put(Matcher $matcher, callable $action, $data = null)
     {
-        return $this->add(["PUT"], $regexp, $action, $data);
+        return $this->add(["PUT"], $matcher, $action, $data);
     }
 
     /**
      * Add route for DELETE method into routes list.
      *
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function delete(string $regexp, callable $action, $data = null)
+    public function delete(Matcher $matcher, callable $action, $data = null)
     {
-        return $this->add(["DELETE"], $regexp, $action, $data);
+        return $this->add(["DELETE"], $matcher, $action, $data);
     }
 
     /**
-     * @param string $regexp
+     * @param Matcher $matcher
      * @param callable $action
      * @param null $data
      * @return Router
      */
-    public function any(string $regexp, callable $action, $data = null)
+    public function any(Matcher $matcher, callable $action, $data = null)
     {
-        return $this->add(self::$availableMethods, $regexp, $action, $data);
+        return $this->add(self::$availableMethods, $matcher, $action, $data);
     }
 
     /**
@@ -268,9 +219,12 @@ class Router implements RouterContract
             return null;
         }
 
-        foreach ($this->routes[$method] as list($regexp, $action, $data)) {
-            if (preg_match($regexp, $path, $args)) {
-                return [$action, $this->filterArgs(array_slice($args, 1)), $data];
+        /**
+         * @var Matcher $matcher
+         */
+        foreach ($this->routes[$method] as list($matcher, $action, $data)) {
+            if ($matcher->matches($path)) {
+                return [$action, $matcher->parameters($path), $data];
             }
         }
 
@@ -289,9 +243,12 @@ class Router implements RouterContract
 
         $middleware = [];
 
-        foreach ($this->middleware as list($regexp, $action)) {
-            if (preg_match($regexp, $path, $args)) {
-                $middleware[] = [$action, $this->filterArgs(array_slice($args, 1))];
+        /**
+         * @var Matcher $matcher
+         */
+        foreach ($this->middleware as list($matcher, $action)) {
+            if ($matcher->matches($path)) {
+                $middleware[] = [$action, $matcher->parameters($path)];
             }
         }
 
@@ -342,20 +299,5 @@ class Router implements RouterContract
     {
         $this->routes = [];
         $this->middleware = [];
-    }
-
-    /**
-     * Filter arguments after regexp matching.
-     *
-     * @param array $args
-     * @return array
-     */
-    public function filterArgs(array $args): array
-    {
-        $isNumeric = array_reduce(array_keys($args), l('$ && is_int($)'), true);
-
-        $filter = $isNumeric ? "is_int" : "is_string";
-
-        return array_filter($args, $filter, ARRAY_FILTER_USE_KEY);
     }
 }

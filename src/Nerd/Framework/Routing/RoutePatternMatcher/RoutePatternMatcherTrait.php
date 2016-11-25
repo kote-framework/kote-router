@@ -15,7 +15,7 @@ trait RoutePatternMatcherTrait
     /**
      * @var array
      */
-    private $cache;
+    private $cache = [];
 
     /**
      * @param string $route
@@ -59,7 +59,7 @@ trait RoutePatternMatcherTrait
      * @param string $route
      * @return bool
      */
-    public function matches(string $route): boolean
+    public function matches(string $route): bool
     {
         $this->match($route);
 

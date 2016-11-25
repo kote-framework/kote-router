@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Nerd\Framework\Routing\RoutePatternMatcher\regex as r;
 use function Nerd\Framework\Routing\RoutePatternMatcher\plain as p;
+use function Nerd\Framework\Routing\RoutePatternMatcher\fast as f;
 
 class RouterTest extends TestCase
 {
@@ -30,26 +31,26 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('/', function () {
+        $router->get(p('/'), function () {
             return 'test-get';
         });
-        $router->post('test/post', function () {
+        $router->post(p('test/post'), function () {
             return 'test-post';
         });
-        $router->put('test/put', function () {
+        $router->put(p('test/put'), function () {
             return 'test-put';
         });
-        $router->delete('test/delete', function () {
+        $router->delete(p('test/delete'), function () {
             return 'test-delete';
         });
-        $router->any('test/any', function () {
+        $router->any(p('test/any'), function () {
             return 'test-any';
         });
 
-        $router->get('foo', function () {
+        $router->get(p('foo'), function () {
             return 'foo';
         });
-        $router->get('bar/', function () {
+        $router->get(p('bar/'), function () {
             return 'bar';
         });
 
@@ -120,7 +121,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('hello/:name', function ($name) {
+        $router->get(p('hello/:name'), function ($name) {
             return "Hello, $name";
         });
 
@@ -132,13 +133,13 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('/', function () {
+        $router->get(p('/'), function () {
             return 'bar';
         });
 
         $this->assertEquals('bar', $router->handle($this->makeRequest('GET', '/')));
 
-        $router->middleware('/', function ($next) {
+        $router->middleware(p('/'), function ($next) {
             return 'foo' . $next();
         });
 
@@ -149,11 +150,11 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('profile/:param', function () {
+        $router->get(p('profile/:param'), function () {
             return 'foo';
         });
 
-        $router->middleware('profile/:param', function ($param, $next) {
+        $router->middleware(p('profile/:param'), function ($param, $next) {
             if ($param == 'admin') {
                 return 'bar';
             }
@@ -172,42 +173,15 @@ class RouterTest extends TestCase
             return $next();
         };
 
-        $router->get('/', function () {
+        $router->get(p('/'), function () {
             return 'foo';
         });
 
         for ($i = 0; $i < 10; $i ++) {
-            $router->middleware('/', $middleware);
+            $router->middleware(p('/'), $middleware);
         }
 
         $this->assertEquals('foo', $router->handle($this->makeRequest('GET', '/')));
-    }
-
-    public function testRoutesPriority()
-    {
-        $router = $this->getRouter();
-
-        $router->get('stuff/:word', function () {
-            return 'stuff';
-        });
-
-        $router->get('stuff/search', function () {
-            return 'search';
-        });
-
-        $this->assertEquals('stuff', $router->handle($this->makeRequest('GET', 'stuff/search')));
-
-        $router->clear();
-
-        $router->get('stuff/search', function () {
-            return 'search';
-        });
-
-        $router->get('stuff/:word', function () {
-            return 'stuff';
-        });
-
-        $this->assertEquals('search', $router->handle($this->makeRequest('GET', 'stuff/search')));
     }
 
     /**
@@ -217,7 +191,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('foo-(\w+)-bar/(\w+)/abc/(\d+)$', function ($a, $b, $c) {
+        $router->get(r('foo-(\w+)-bar/(\w+)/abc/(\d+)'), function ($a, $b, $c) {
             return "$a-$b-$c";
         });
 
@@ -234,7 +208,7 @@ class RouterTest extends TestCase
             return 'global-' . $action();
         });
 
-        $router->get('/', function () {
+        $router->get(p('/'), function () {
             return 'home';
         });
 
@@ -251,23 +225,16 @@ class RouterTest extends TestCase
             return 'global-' . $middleware($next);
         });
 
-        $router->middleware('/', function ($next) {
+        $router->middleware(p('/'), function ($next) {
             return 'middleware-' . $next();
         });
 
-        $router->get('/', function () {
+        $router->get(p('/'), function () {
             return 'home';
         });
 
         $this->assertEquals('global-middleware-home', $router->handle($this->makeRequest('GET', '/')));
 
         Router::setGlobalMiddlewareHandler(null);
-    }
-
-    public function testFilterArgs()
-    {
-        $router = new Router();
-        $this->assertEquals([1, 2, 3], $router->filterArgs([1, 2, 3]));
-        $this->assertEquals(["a" => 1, "b" => 2], $router->filterArgs(["a" => 1, "b" => 2, 3, 4]));
     }
 }
