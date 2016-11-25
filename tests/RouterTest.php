@@ -6,7 +6,8 @@ use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
-use function Nerd\Framework\Routing\RoutePatternMatcher\regex;
+use function Nerd\Framework\Routing\RoutePatternMatcher\regex as r;
+use function Nerd\Framework\Routing\RoutePatternMatcher\plain as p;
 
 class RouterTest extends TestCase
 {
