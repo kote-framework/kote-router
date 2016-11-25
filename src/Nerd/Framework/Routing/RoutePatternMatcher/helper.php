@@ -25,3 +25,12 @@ function plain(string $route): RoutePatternMatcher
 {
     return new PlainRouteMatcher($route);
 }
+
+/**
+ * @param string $route
+ * @return RoutePatternMatcher
+ */
+function fast(string $route): RoutePatternMatcher
+{
+    return null;
+}

@@ -15,22 +15,30 @@ class PlainRouteMatcher extends RegexRouteMatcher
      */
     public function __construct(string $route)
     {
-        $quotedRoute = $this->quoteRoute($route);
-        $convertedRoute = $this->convertArguments($quotedRoute);
+        $quotedRoute    = $this->escapeSpecialSymbols($route);
+        $convertedRoute = $this->convertParameters($quotedRoute);
 
         parent::__construct($convertedRoute);
     }
 
-    private function quoteRoute(string $route): string
+    /**
+     * @param string $route
+     * @return string
+     */
+    private function escapeSpecialSymbols(string $route): string
     {
         $specialSymbols = '.\\/+*?[^]$(){}=!<>|-';
 
-        return implode(array_map(function ($char) use ($specialSymbols) {
+        return implode('', array_map(function ($char) use ($specialSymbols) {
             return strpos($specialSymbols, $char) === false ? $char : '\\' . $char;
         }, str_split($route)));
     }
 
-    private function convertArguments(string $route): string
+    /**
+     * @param string $route
+     * @return string
+     */
+    private function convertParameters(string $route): string
     {
         $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $route);
         $updatedRoute = preg_replace('/&([^\/]+)/', '(?P<$1>[\d]+)', $updatedRoute);

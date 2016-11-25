@@ -8,9 +8,15 @@
 
 namespace Nerd\Framework\Routing\RoutePatternMatcher;
 
+use Nerd\Framework\Routing\RouterException;
 
 class RegexRouteMatcher implements RoutePatternMatcher
 {
+    use RoutePatternMatcherTrait;
+
+    /**
+     * @var string
+     */
     private $route;
 
     /**
@@ -19,34 +25,31 @@ class RegexRouteMatcher implements RoutePatternMatcher
      */
     public function __construct(string $route)
     {
-        $this->route = "~^$route$~";
-    }
-
-    /**
-     * @param string $route
-     * @return bool
-     */
-    public function matches(string $route): boolean
-    {
-        return (boolean) preg_match($this->route, $route);
-    }
-
-    /**
-     * @param string $route
-     * @return array
-     */
-    public function parameters(string $route): array
-    {
-        preg_match($this->route, $route, $args);
-
-        return array_slice($args, 1);
+        $this->route = "/^$route$/";
     }
 
     /**
      * @return string
      */
-    public function __toString()
+    public function getRoute()
     {
         return $this->route;
+    }
+
+    /**
+     * @param string $route
+     * @return void
+     */
+    protected function match(string $route)
+    {
+        if ($this->isCached($route)) {
+            return;
+        }
+
+        if (preg_match($this->route, $route, $args)) {
+            $this->saveToCache($route, array_slice($args, 1));
+        } else {
+            $this->saveToCache($route, null);
+        }
     }
 }
