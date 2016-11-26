@@ -13,9 +13,6 @@ use Nerd\Framework\Routing\Route\Matcher\FastMatcher;
 use Nerd\Framework\Routing\Route\Matcher\MatcherBuilder;
 use Nerd\Framework\Routing\Route\Matcher\RegexMatcher;
 use Nerd\Framework\Routing\Route\Matcher\StaticMatcher;
-use function Nerd\Framework\Routing\RoutePatternMatcher\fast;
-use function Nerd\Framework\Routing\RoutePatternMatcher\plain;
-use function Nerd\Framework\Routing\RoutePatternMatcher\regex;
 
 use PHPUnit\Framework\TestCase;
 

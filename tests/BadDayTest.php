@@ -6,10 +6,6 @@ use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
-use function Nerd\Framework\Routing\RoutePatternMatcher\regex as r;
-use function Nerd\Framework\Routing\RoutePatternMatcher\plain as p;
-use function Nerd\Framework\Routing\RoutePatternMatcher\fast as f;
-
 class BadDayTest extends TestCase
 {
     private function makeRequest($method, $path)
