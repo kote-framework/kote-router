@@ -8,14 +8,44 @@
 
 namespace tests;
 
+use Nerd\Framework\Routing\Route\Matcher\FastMatcher;
+use Nerd\Framework\Routing\Route\Matcher\SimpleMatcher;
 use function Nerd\Framework\Routing\RoutePatternMatcher\fast;
 use function Nerd\Framework\Routing\RoutePatternMatcher\plain;
 use function Nerd\Framework\Routing\RoutePatternMatcher\regex;
 
 use PHPUnit\Framework\TestCase;
 
-class RoutePatternMatcherTest extends TestCase
+class RouteMatcherTest extends TestCase
 {
+    public function testSimpleMatcher()
+    {
+        $matcher = new SimpleMatcher('/');
+
+        $this->assertTrue($matcher->matches('/'));
+        $this->assertFalse($matcher->matches('other'));
+
+        $this->assertEquals([], $matcher->extractParameters('/'));
+    }
+
+    public function testFastMatcher()
+    {
+        $matcher = new FastMatcher('users/:userId');
+
+        $this->assertTrue($matcher->matches('users/bill'));
+        $this->assertEquals(['userId' => 'bill'], $matcher->extractParameters('users/bill'));
+
+        $this->assertFalse($matcher->matches('/'));
+        $this->assertFalse($matcher->matches('users/bill/other'));
+        $this->assertFalse($matcher->matches('images'));
+
+        $otherMatcher = new FastMatcher('users/:userId/images/&imageId');
+
+        $this->assertTrue($otherMatcher->matches('users/bob/images/11'));
+        $this->assertFalse($otherMatcher->matches('users/bob/images/string'));
+        $this->assertFalse($otherMatcher->matches('users/bob/images/'));
+    }
+
     public function testRegexRouteMatcher()
     {
         $matcher = regex('users/(.+)');
