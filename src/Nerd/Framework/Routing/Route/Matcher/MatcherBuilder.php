@@ -12,6 +12,10 @@ use Nerd\Framework\Routing\RouterException;
 
 class MatcherBuilder
 {
+    /**
+     * @param string $routePattern
+     * @return Matcher
+     */
     public function build(string $routePattern): Matcher
     {
         $this->validate($routePattern);
@@ -35,6 +39,10 @@ class MatcherBuilder
         return new FastMatcher($routePattern);
     }
 
+    /**
+     * @param string $routePattern
+     * @throws RouterException
+     */
     private function validate(string $routePattern)
     {
         if (empty($routePattern)) {
