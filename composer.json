@@ -20,9 +20,6 @@
     "satooshi/php-coveralls": "^1.0"
   },
   "autoload": {
-    "files": [
-      "src/Nerd/Framework/Routing/RoutePatternMatcher/helper.php"
-    ],
     "psr-4": {
       "": "src/",
       "tests\\": "tests/"

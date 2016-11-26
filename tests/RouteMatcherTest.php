@@ -79,7 +79,10 @@ class RouteMatcherTest extends TestCase
         $multiParameterMatcher = new ExtendedMatcher('items/&id-:name');
 
         $this->assertTrue($multiParameterMatcher->matches('items/15-something'));
-        $this->assertEquals(['id' => '15', 'name' => 'something'], $multiParameterMatcher->extractParameters('items/15-something'));
+        $this->assertEquals(
+            ['id' => '15', 'name' => 'something'],
+            $multiParameterMatcher->extractParameters('items/15-something')
+        );
     }
 
     public function testMatcherBuilder()
