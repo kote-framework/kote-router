@@ -13,9 +13,9 @@ class RegexMatcher extends Matcher
     /**
      * @param string $route
      */
-    public function __construct($route)
+    public function __construct(string $route)
     {
-        parent::__construct($this->normalizeRegex($route));
+        parent::__construct('~' . $route . '~');
     }
 
     /**
@@ -53,14 +53,5 @@ class RegexMatcher extends Matcher
         $filter = $isNumeric ? "is_int" : "is_string";
 
         return array_filter($args, $filter, ARRAY_FILTER_USE_KEY);
-    }
-
-    /**
-     * @param string $regex
-     * @return string
-     */
-    private function normalizeRegex(string $regex): string
-    {
-        return $regex;
     }
 }

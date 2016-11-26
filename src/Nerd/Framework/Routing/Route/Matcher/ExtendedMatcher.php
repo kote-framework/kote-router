@@ -10,12 +10,15 @@ namespace Nerd\Framework\Routing\Route\Matcher;
 
 class ExtendedMatcher extends RegexMatcher
 {
-    public function __construct($route)
+    /**
+     * @param string $route
+     */
+    public function __construct(string $route)
     {
         $quotedRoute    = $this->escapeSpecialSymbols($route);
         $convertedRoute = $this->convertParameters($quotedRoute);
 
-        parent::__construct("/$convertedRoute/");
+        parent::__construct("^{$convertedRoute}$");
     }
 
     /**
@@ -24,7 +27,7 @@ class ExtendedMatcher extends RegexMatcher
      */
     private function escapeSpecialSymbols(string $route): string
     {
-        $specialSymbols = '.\\/+*?[^]$~(){}=!<>|-';
+        $specialSymbols = '.\\+*?[^]$~(){}=!<>|-';
 
         return implode('', array_map(function ($char) use ($specialSymbols) {
             return strpos($specialSymbols, $char) === false ? $char : '\\' . $char;

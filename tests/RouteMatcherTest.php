@@ -8,7 +8,9 @@
 
 namespace tests;
 
+use Nerd\Framework\Routing\Route\Matcher\ExtendedMatcher;
 use Nerd\Framework\Routing\Route\Matcher\FastMatcher;
+use Nerd\Framework\Routing\Route\Matcher\RegexMatcher;
 use Nerd\Framework\Routing\Route\Matcher\SimpleMatcher;
 use function Nerd\Framework\Routing\RoutePatternMatcher\fast;
 use function Nerd\Framework\Routing\RoutePatternMatcher\plain;
@@ -46,53 +48,39 @@ class RouteMatcherTest extends TestCase
         $this->assertFalse($otherMatcher->matches('users/bob/images/'));
     }
 
-    public function testRegexRouteMatcher()
+    public function testRegexMatcher()
     {
-        $matcher = regex('users/(.+)');
+        $matcher = new RegexMatcher('users/(.+)');
 
         $this->assertTrue($matcher->matches('users/bill'));
-
-        $this->assertEquals(['bill'], $matcher->parameters('users/bill'));
+        $this->assertEquals(['bill'], $matcher->extractParameters('users/bill'));
 
         $this->assertFalse($matcher->matches('other/route'));
 
-        $this->assertNull($matcher->parameters('other/route'));
+        $otherMatcher = new RegexMatcher('users/(?P<userId>.+)');
+
+        $this->assertTrue($otherMatcher->matches('users/bill'));
+        $this->assertEquals(['userId' => 'bill'], $otherMatcher->extractParameters('users/bill'));
     }
 
-    public function testPlainRouteMatcher()
+    public function testExtendedMatcher()
     {
-        $matcher = plain('users/:id');
+        $matcher = new ExtendedMatcher('users/:id');
 
         $this->assertTrue($matcher->matches('users/bill'));
-
-        $this->assertEquals(['id' => 'bill'], $matcher->parameters('users/bill'));
+        $this->assertEquals(['id' => 'bill'], $matcher->extractParameters('users/bill'));
 
         $this->assertFalse($matcher->matches('other/route'));
 
-        $this->assertNull($matcher->parameters('other/route'));
-    }
 
-    public function testFastRouteMatcher()
-    {
-        $matcher = fast('users/:id');
+        $numericMatcher = new ExtendedMatcher('users/&userId');
 
-        $this->assertEquals('users/:id', (string) $matcher);
+        $this->assertTrue($numericMatcher->matches('users/100'));
+        $this->assertFalse($numericMatcher->matches('users/sam'));
 
-        $this->assertTrue($matcher->matches('users/bill'));
+        $multiParameterMatcher = new ExtendedMatcher('items/&id-:name');
 
-        $this->assertEquals(['id' => 'bill'], $matcher->parameters('users/bill'));
-
-        $this->assertFalse($matcher->matches('other/route'));
-
-        $this->assertNull($matcher->parameters('other/route'));
-    }
-
-    public function testMultipleArguments()
-    {
-        $matcher = plain('users/:userId/images/:imageId');
-
-        $this->assertTrue($matcher->matches('users/bill/images/picture'));
-
-        $this->assertEquals(['userId' => 'bill', 'imageId' => 'picture'], $matcher->parameters('users/bill/images/picture'));
+        $this->assertTrue($multiParameterMatcher->matches('items/15-something'));
+        $this->assertEquals(['id' => '15', 'name' => 'something'], $multiParameterMatcher->extractParameters('items/15-something'));
     }
 }
