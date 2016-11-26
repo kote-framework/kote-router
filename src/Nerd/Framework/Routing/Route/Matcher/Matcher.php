@@ -23,14 +23,6 @@ abstract class Matcher implements MatcherContract
      */
     public function __construct(string $route)
     {
-        if (empty($route)) {
-            throw new RouterException("Route could not be empty.");
-        }
-
-        if ($route != '/' && $route[0] == '/') {
-            throw new RouterException("Route could not start with '/' character.");
-        }
-
         $this->route = $route;
     }
 

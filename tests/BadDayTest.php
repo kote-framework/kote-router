@@ -26,4 +26,30 @@ class BadDayTest extends TestCase
         $router = new Router();
         $router->handle($this->makeRequest('GET', '/'));
     }
+
+    /**
+     * @expectedException \Nerd\Framework\Routing\RouterException
+     * @expectedExceptionMessage Route could not be empty.
+     */
+    public function testTryToMakeEmptyRoute()
+    {
+        $router = new Router();
+
+        $router->get('', function () {
+            //
+        });
+    }
+
+    /**
+     * @expectedException \Nerd\Framework\Routing\RouterException
+     * @expectedExceptionMessage Route could not start with '/' character.
+     */
+    public function testTryToMakeEmptyRouteFromSlash()
+    {
+        $router = new Router();
+
+        $router->get('/something', function () {
+            //
+        });
+    }
 }
