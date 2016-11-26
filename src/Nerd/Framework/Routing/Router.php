@@ -3,7 +3,8 @@
 namespace Nerd\Framework\Routing;
 
 use Nerd\Framework\Http\Request\RequestContract;
-use Nerd\Framework\Routing\RoutePatternMatcher\RoutePatternMatcherContract as Matcher;
+use Nerd\Framework\Routing\Route\Matcher\MatcherBuilder;
+use Nerd\Framework\Routing\Route\Matcher\Matcher;
 
 class Router implements RouterContract
 {
@@ -43,6 +44,17 @@ class Router implements RouterContract
     private static $globalMiddlewareHandler;
 
     /**
+     * @var MatcherBuilder
+     */
+    private $matcherBuilder;
+
+
+    public function __construct()
+    {
+        $this->matcherBuilder = new MatcherBuilder();
+    }
+
+    /**
      * Set global route handler.
      *
      * @param callable $globalRouteHandler
@@ -65,12 +77,14 @@ class Router implements RouterContract
     /**
      * Add middleware to router.
      *
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $middleware
      * @return Router
      */
-    public function middleware(Matcher $matcher, callable $middleware)
+    public function middleware(string $pattern, callable $middleware)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         $this->middleware[] = [$matcher, $middleware];
 
         return $this;
@@ -80,13 +94,15 @@ class Router implements RouterContract
      * Add route into routes list.
      *
      * @param string|array $methods
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function add(array $methods, Matcher $matcher, callable $action, $data = null)
+    public function add(array $methods, string $pattern, callable $action, $data = null)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         foreach ($methods as $method) {
             if (!array_key_exists($method, $this->routes)) {
                 $this->routes[$method] = [];
@@ -101,63 +117,73 @@ class Router implements RouterContract
     /**
      * Add route for GET method into routes list.
      *
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function get(Matcher $matcher, callable $action, $data = null)
+    public function get(string $pattern, callable $action, $data = null)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         return $this->add(["HEAD", "GET"], $matcher, $action, $data);
     }
 
     /**
      * Add route for POST method into routes list.
      *
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function post(Matcher $matcher, callable $action, $data = null)
+    public function post(string $pattern, callable $action, $data = null)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         return $this->add(["POST"], $matcher, $action, $data);
     }
 
     /**
      * Add route for PUT method into routes list.
      *
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function put(Matcher $matcher, callable $action, $data = null)
+    public function put(string $pattern, callable $action, $data = null)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         return $this->add(["PUT"], $matcher, $action, $data);
     }
 
     /**
      * Add route for DELETE method into routes list.
      *
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $action
      * @param mixed $data
      * @return Router
      */
-    public function delete(Matcher $matcher, callable $action, $data = null)
+    public function delete(string $pattern, callable $action, $data = null)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         return $this->add(["DELETE"], $matcher, $action, $data);
     }
 
     /**
-     * @param Matcher $matcher
+     * @param string $pattern
      * @param callable $action
      * @param null $data
      * @return Router
      */
-    public function any(Matcher $matcher, callable $action, $data = null)
+    public function any(string $pattern, callable $action, $data = null)
     {
+        $matcher = $this->matcherBuilder->build($pattern);
+
         return $this->add(self::$availableMethods, $matcher, $action, $data);
     }
 
@@ -224,7 +250,7 @@ class Router implements RouterContract
          */
         foreach ($this->routes[$method] as list($matcher, $action, $data)) {
             if ($matcher->matches($path)) {
-                return [$action, $matcher->parameters($path), $data];
+                return [$action, $matcher->extractParameters($path), $data];
             }
         }
 
@@ -248,7 +274,7 @@ class Router implements RouterContract
          */
         foreach ($this->middleware as list($matcher, $action)) {
             if ($matcher->matches($path)) {
-                $middleware[] = [$action, $matcher->parameters($path)];
+                $middleware[] = [$action, $matcher->extractParameters($path)];
             }
         }
 

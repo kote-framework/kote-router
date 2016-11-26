@@ -10,8 +10,9 @@ namespace tests;
 
 use Nerd\Framework\Routing\Route\Matcher\ExtendedMatcher;
 use Nerd\Framework\Routing\Route\Matcher\FastMatcher;
+use Nerd\Framework\Routing\Route\Matcher\MatcherBuilder;
 use Nerd\Framework\Routing\Route\Matcher\RegexMatcher;
-use Nerd\Framework\Routing\Route\Matcher\SimpleMatcher;
+use Nerd\Framework\Routing\Route\Matcher\StaticMatcher;
 use function Nerd\Framework\Routing\RoutePatternMatcher\fast;
 use function Nerd\Framework\Routing\RoutePatternMatcher\plain;
 use function Nerd\Framework\Routing\RoutePatternMatcher\regex;
@@ -22,7 +23,7 @@ class RouteMatcherTest extends TestCase
 {
     public function testSimpleMatcher()
     {
-        $matcher = new SimpleMatcher('/');
+        $matcher = new StaticMatcher('/');
 
         $this->assertTrue($matcher->matches('/'));
         $this->assertFalse($matcher->matches('other'));
@@ -82,5 +83,16 @@ class RouteMatcherTest extends TestCase
 
         $this->assertTrue($multiParameterMatcher->matches('items/15-something'));
         $this->assertEquals(['id' => '15', 'name' => 'something'], $multiParameterMatcher->extractParameters('items/15-something'));
+    }
+
+    public function testMatcherBuilder()
+    {
+        $builder = new MatcherBuilder();
+
+        $this->assertInstanceOf(StaticMatcher::class, $builder->build('/'));
+        $this->assertInstanceOf(StaticMatcher::class, $builder->build('route/static'));
+        $this->assertInstanceOf(FastMatcher::class, $builder->build('user/:userId'));
+        $this->assertInstanceOf(ExtendedMatcher::class, $builder->build('user/:userId-:otherId'));
+        $this->assertInstanceOf(RegexMatcher::class, $builder->build('~^user/(/d+)$~'));
     }
 }

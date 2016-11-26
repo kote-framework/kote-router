@@ -6,10 +6,6 @@ use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
-use function Nerd\Framework\Routing\RoutePatternMatcher\regex as r;
-use function Nerd\Framework\Routing\RoutePatternMatcher\plain as p;
-use function Nerd\Framework\Routing\RoutePatternMatcher\fast as f;
-
 class RouterTest extends TestCase
 {
     private function makeRequest($method, $path)
@@ -31,26 +27,26 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get(p('/'), function () {
+        $router->get('/', function () {
             return 'test-get';
         });
-        $router->post(p('test/post'), function () {
+        $router->post('test/post', function () {
             return 'test-post';
         });
-        $router->put(p('test/put'), function () {
+        $router->put('test/put', function () {
             return 'test-put';
         });
-        $router->delete(p('test/delete'), function () {
+        $router->delete('test/delete', function () {
             return 'test-delete';
         });
-        $router->any(p('test/any'), function () {
+        $router->any('test/any', function () {
             return 'test-any';
         });
 
-        $router->get(p('foo'), function () {
+        $router->get('foo', function () {
             return 'foo';
         });
-        $router->get(p('bar/'), function () {
+        $router->get('bar/', function () {
             return 'bar';
         });
 
@@ -121,7 +117,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get(p('hello/:name'), function ($name) {
+        $router->get('hello/:name', function ($name) {
             return "Hello, $name";
         });
 
@@ -133,13 +129,13 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get(p('/'), function () {
+        $router->get('/', function () {
             return 'bar';
         });
 
         $this->assertEquals('bar', $router->handle($this->makeRequest('GET', '/')));
 
-        $router->middleware(p('/'), function ($next) {
+        $router->middleware('/', function ($next) {
             return 'foo' . $next();
         });
 
@@ -150,11 +146,11 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get(p('profile/:param'), function () {
+        $router->get('profile/:param', function () {
             return 'foo';
         });
 
-        $router->middleware(p('profile/:param'), function ($param, $next) {
+        $router->middleware('profile/:param', function ($param, $next) {
             if ($param == 'admin') {
                 return 'bar';
             }
@@ -173,12 +169,12 @@ class RouterTest extends TestCase
             return $next();
         };
 
-        $router->get(p('/'), function () {
+        $router->get('/', function () {
             return 'foo';
         });
 
         for ($i = 0; $i < 10; $i ++) {
-            $router->middleware(p('/'), $middleware);
+            $router->middleware('/', $middleware);
         }
 
         $this->assertEquals('foo', $router->handle($this->makeRequest('GET', '/')));
@@ -191,7 +187,7 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get(r('foo-(\w+)-bar/(\w+)/abc/(\d+)'), function ($a, $b, $c) {
+        $router->get('~^foo-(\w+)-bar/(\w+)/abc/(\d+)$~', function ($a, $b, $c) {
             return "$a-$b-$c";
         });
 
@@ -208,7 +204,7 @@ class RouterTest extends TestCase
             return 'global-' . $action();
         });
 
-        $router->get(p('/'), function () {
+        $router->get('/', function () {
             return 'home';
         });
 
@@ -225,11 +221,11 @@ class RouterTest extends TestCase
             return 'global-' . $middleware($next);
         });
 
-        $router->middleware(p('/'), function ($next) {
+        $router->middleware('/', function ($next) {
             return 'middleware-' . $next();
         });
 
-        $router->get(p('/'), function () {
+        $router->get('/', function () {
             return 'home';
         });
 

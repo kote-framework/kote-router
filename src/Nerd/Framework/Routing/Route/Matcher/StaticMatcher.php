@@ -8,7 +8,7 @@
 
 namespace Nerd\Framework\Routing\Route\Matcher;
 
-class SimpleMatcher extends Matcher
+class StaticMatcher extends Matcher
 {
     /**
      * @param string $route
