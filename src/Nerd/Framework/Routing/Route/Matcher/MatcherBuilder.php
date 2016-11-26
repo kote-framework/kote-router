@@ -44,7 +44,6 @@ class MatcherBuilder
         if ($routePattern != '/' && $routePattern[0] == '/') {
             throw new RouterException("Route could not start with '/' character.");
         }
-
     }
 
     /**
