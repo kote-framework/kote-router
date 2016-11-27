@@ -3,6 +3,7 @@
 namespace tests;
 
 use Nerd\Framework\Http\Request\RequestContract;
+use Nerd\Framework\Routing\Route\RouteContract;
 use Nerd\Framework\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
@@ -200,8 +201,8 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        Router::setGlobalRouteHandler(function ($action) {
-            return 'global-' . $action();
+        Router::setGlobalRouteHandler(function (RequestContract $request, RouteContract $route) {
+            return 'global-' . call_user_func($route->getAction());
         });
 
         $router->get('/', function () {

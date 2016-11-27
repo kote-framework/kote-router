@@ -5,6 +5,8 @@ namespace Nerd\Framework\Routing;
 use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Route\Matcher\MatcherBuilder;
 use Nerd\Framework\Routing\Route\Matcher\Matcher;
+use Nerd\Framework\Routing\Route\Route;
+use Nerd\Framework\Routing\Route\RouteContract;
 
 class Router implements RouterContract
 {
@@ -18,7 +20,7 @@ class Router implements RouterContract
     /**
      * List of registered routes.
      *
-     * @var array
+     * @var RouteContract[][]
      */
     private $routes = [];
 
@@ -102,13 +104,14 @@ class Router implements RouterContract
     public function add(array $methods, string $pattern, callable $action, $data = null)
     {
         $matcher = $this->matcherBuilder->build($pattern);
+        $route = new Route($matcher, $action, $data);
 
         foreach ($methods as $method) {
             if (!array_key_exists($method, $this->routes)) {
                 $this->routes[$method] = [];
             }
 
-            $this->routes[$method][] = [$matcher, $action, $data];
+            $this->routes[$method][] = $route;
         }
 
         return $this;
@@ -204,20 +207,21 @@ class Router implements RouterContract
 
         $middleware = $this->findMiddleware($request);
 
-        return $this->cascadeMiddlewareWithRoute($middleware, $route);
+        return $this->cascadeMiddlewareWithRoute($middleware, $route, $request);
     }
 
     /**
      * Cascades middleware list with route action.
      *
      * @param array $middleware
-     * @param array $route
+     * @param RouteContract $route
+     * @param RequestContract $request
      * @return mixed
      */
-    private function cascadeMiddlewareWithRoute(array $middleware, array $route)
+    private function cascadeMiddlewareWithRoute(array $middleware, RouteContract $route, RequestContract $request)
     {
-        $invokeRoute = function () use ($route) {
-            return $this->invokeRoute(...$route);
+        $invokeRoute = function () use ($route, $request) {
+            return $this->invokeRoute($route, $request);
         };
 
         $action = array_reduce(array_reverse($middleware), function ($first, $second) {
@@ -234,23 +238,19 @@ class Router implements RouterContract
      * Gets route matching request.
      *
      * @param RequestContract $request
-     * @return array
+     * @return RouteContract|null
      */
     private function findMatchingRoute(RequestContract $request)
     {
         $method = $request->getMethod();
-        $path = $request->getPath();
 
         if (!array_key_exists($method, $this->routes)) {
             return null;
         }
 
-        /**
-         * @var Matcher $matcher
-         */
-        foreach ($this->routes[$method] as list($matcher, $action, $data)) {
-            if ($matcher->matches($path)) {
-                return [$action, $matcher->extractParameters($path), $data];
+        foreach ($this->routes[$method] as $route) {
+            if ($route->matches($request)) {
+                return $route;
             }
         }
 
@@ -281,20 +281,20 @@ class Router implements RouterContract
         return $middleware;
     }
 
-     /**
-     * @param callable $action
-     * @param array $args
-     * @param mixed $data
+    /**
+     * @param RouteContract $route
+     * @param RequestContract $request
      * @return mixed
-     * @throws RouterException
      */
-    private function invokeRoute(callable $action, array $args, $data)
+    private function invokeRoute(RouteContract $route, RequestContract $request)
     {
         if (is_callable(self::$globalRouteHandler)) {
-            return call_user_func(self::$globalRouteHandler, $action, $args, $data);
+            return call_user_func(self::$globalRouteHandler, $request, $route);
         }
 
-        return call_user_func_array($action, array_values($args));
+        $parameters = $route->parameters($request);
+
+        return call_user_func_array($route->getAction(), array_values($parameters));
     }
 
     /**
