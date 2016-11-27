@@ -18,7 +18,7 @@ class ExtendedMatcher extends RegexMatcher
         $quotedRoute    = $this->escapeSpecialSymbols($route);
         $convertedRoute = $this->convertParameters($quotedRoute);
 
-        parent::__construct("^{$convertedRoute}$");
+        parent::__construct("~^{$convertedRoute}$~");
     }
 
     /**

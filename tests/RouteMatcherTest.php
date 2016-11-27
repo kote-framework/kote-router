@@ -48,14 +48,14 @@ class RouteMatcherTest extends TestCase
 
     public function testRegexMatcher()
     {
-        $matcher = new RegexMatcher('users/(.+)');
+        $matcher = new RegexMatcher('~^users/(.+)$~');
 
         $this->assertTrue($matcher->matches('users/bill'));
         $this->assertEquals(['bill'], $matcher->extractParameters('users/bill'));
 
         $this->assertFalse($matcher->matches('other/route'));
 
-        $otherMatcher = new RegexMatcher('users/(?P<userId>.+)');
+        $otherMatcher = new RegexMatcher('~^users/(?P<userId>.+)$~');
 
         $this->assertTrue($otherMatcher->matches('users/bill'));
         $this->assertEquals(['userId' => 'bill'], $otherMatcher->extractParameters('users/bill'));

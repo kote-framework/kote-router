@@ -15,7 +15,7 @@ class RegexMatcher extends Matcher
      */
     public function __construct(string $route)
     {
-        parent::__construct('~' . $route . '~');
+        parent::__construct($route);
     }
 
     /**

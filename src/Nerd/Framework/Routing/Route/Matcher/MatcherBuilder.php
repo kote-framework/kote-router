@@ -21,7 +21,7 @@ class MatcherBuilder
         $this->validate($routePattern);
 
         if ($routePattern[0] == '~') {
-            return new RegexMatcher(trim($routePattern, '~'));
+            return new RegexMatcher($routePattern);
         }
 
         if ($this->isRouteWithoutParameters($routePattern)) {
