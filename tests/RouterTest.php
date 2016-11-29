@@ -130,14 +130,12 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('/', function () {
+        $mw = function (RouteContract $route, RequestContract $request, callable $next) {
+            return 'foo' . $next($route, $request);
+        };
+
+        $router->get('/', $mw, function () {
             return 'bar';
-        });
-
-        $this->assertEquals('bar', $router->handle($this->makeRequest('GET', '/')));
-
-        $router->middleware('/', function ($next) {
-            return 'foo' . $next();
         });
 
         $this->assertEquals('foobar', $router->handle($this->makeRequest('GET', '/')));
@@ -147,15 +145,16 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $router->get('profile/:param', function () {
-            return 'foo';
-        });
-
-        $router->middleware('profile/:param', function ($param, $next) {
-            if ($param == 'admin') {
+        $mw = function (RouteContract $route, RequestContract $request, callable $next) {
+            $parameters = $route->parameters($request);
+            if ($parameters['param'] == 'admin') {
                 return 'bar';
             }
-            return $next();
+            return $next($route, $request);
+        };
+
+        $router->get('profile/:param', $mw, function () {
+            return 'foo';
         });
 
         $this->assertEquals('foo', $router->handle($this->makeRequest('GET', 'profile/john-smith')));
@@ -166,19 +165,19 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        $middleware = function ($next) {
-            return $next();
+        $mw1 = function ($route, $request, $next) {
+            return 'a.' . $next($route, $request);
         };
 
-        $router->get('/', function () {
+        $mw2 = function ($route, $request, $next) {
+            return 'b.' . $next($route, $request);
+        };
+
+        $router->get('/', $mw1, $mw2, function () {
             return 'foo';
         });
 
-        for ($i = 0; $i < 10; $i ++) {
-            $router->middleware('/', $middleware);
-        }
-
-        $this->assertEquals('foo', $router->handle($this->makeRequest('GET', '/')));
+        $this->assertEquals('a.b.foo', $router->handle($this->makeRequest('GET', '/')));
     }
 
     /**
@@ -218,15 +217,15 @@ class RouterTest extends TestCase
     {
         $router = $this->getRouter();
 
-        Router::setGlobalMiddlewareHandler(function ($middleware, $args, $next) {
-            return 'global-' . $middleware($next);
+        Router::setGlobalMiddlewareHandler(function ($middleware, $route, $request, $next) {
+            return 'global-' . $middleware($route, $request, $next);
         });
 
-        $router->middleware('/', function ($next) {
-            return 'middleware-' . $next();
-        });
+        $mw = function ($route, $request, $next) {
+            return 'middleware-' . $next($route, $request);
+        };
 
-        $router->get('/', function () {
+        $router->get('/', $mw, function () {
             return 'home';
         });
 

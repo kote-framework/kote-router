@@ -73,19 +73,19 @@ class Router implements RouterContract
      *
      * @param string|array $methods
      * @param string $pattern
-     * @param callable[] ...$action
+     * @param callable[] ...$actions
      * @return Router
      */
-    public function add(array $methods, string $pattern, callable ...$action)
+    public function add(array $methods, string $pattern, callable ...$actions): RouteContract
     {
-        $actionSize = sizeof($action);
+        $actionSize = sizeof($actions);
 
         if ($actionSize == 0) {
             throw new \BadMethodCallException("Action need to be specified.");
         }
 
-        $action = end($action);
-        $middleware = array_slice($action, 0, $actionSize - 1);
+        $action = $actions[$actionSize - 1];
+        $middleware = array_slice($actions, 0, $actionSize - 1);
 
         $matcher = $this->matcherBuilder->build($pattern);
         $route = new Route($matcher, $middleware, $action);
@@ -98,7 +98,7 @@ class Router implements RouterContract
             $this->routes[$method][] = $route;
         }
 
-        return $this;
+        return $route;
     }
 
     /**
@@ -108,11 +108,11 @@ class Router implements RouterContract
      * @param callable[] ...$action
      * @return Router
      */
-    public function get(string $pattern, callable ...$action)
+    public function get(string $pattern, callable ...$action): RouteContract
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["HEAD", "GET"], $matcher, $action);
+        return $this->add(["HEAD", "GET"], $matcher, ...$action);
     }
 
     /**
@@ -122,11 +122,11 @@ class Router implements RouterContract
      * @param callable[] ...$action
      * @return Router
      */
-    public function post(string $pattern, callable ...$action)
+    public function post(string $pattern, callable ...$action): RouteContract
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["POST"], $matcher, $action);
+        return $this->add(["POST"], $matcher, ...$action);
     }
 
     /**
@@ -136,11 +136,11 @@ class Router implements RouterContract
      * @param callable[] ...$action
      * @return Router
      */
-    public function put(string $pattern, callable ...$action)
+    public function put(string $pattern, callable ...$action): RouteContract
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["PUT"], $matcher, $action);
+        return $this->add(["PUT"], $matcher, ...$action);
     }
 
     /**
@@ -150,11 +150,11 @@ class Router implements RouterContract
      * @param callable[] ...$action
      * @return Router
      */
-    public function delete(string $pattern, callable ...$action)
+    public function delete(string $pattern, callable ...$action): RouteContract
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["DELETE"], $matcher, $action);
+        return $this->add(["DELETE"], $matcher, ...$action);
     }
 
     /**
@@ -162,11 +162,11 @@ class Router implements RouterContract
      * @param callable[] ...$action
      * @return Router
      */
-    public function any(string $pattern, callable ...$action)
+    public function any(string $pattern, callable ...$action): RouteContract
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(self::$availableMethods, $matcher, $action);
+        return $this->add(self::$availableMethods, $matcher, ...$action);
     }
 
     /**
@@ -196,17 +196,17 @@ class Router implements RouterContract
      */
     private function cascadeMiddlewareWithRoute(RouteContract $route, RequestContract $request)
     {
-        $invokeRoute = function ($request) use ($route) {
+        $invokeRoute = function ($route, $request) {
             return $this->invokeRoute($route, $request);
         };
 
         $action = array_reduce(array_reverse($route->getMiddleware()), function ($first, $second) {
-            return function (RequestContract $request) use ($first, $second) {
-                return $this->invokeMiddleware($second, $request, $first);
+            return function (RouteContract $route, RequestContract $request) use ($first, $second) {
+                return $this->invokeMiddleware($second, $route, $request, $first);
             };
         }, $invokeRoute);
 
-        return $action($request);
+        return $action($route, $request);
     }
 
     /**
@@ -250,17 +250,18 @@ class Router implements RouterContract
 
     /**
      * @param callable $action
+     * @param RouteContract $route
      * @param RequestContract $request
      * @param callable $next
      * @return mixed
      */
-    private function invokeMiddleware(callable $action, RequestContract $request, callable $next)
+    private function invokeMiddleware(callable $action, RouteContract $route, RequestContract $request, callable $next)
     {
         if (is_callable(self::$globalMiddlewareHandler)) {
-            return call_user_func(self::$globalMiddlewareHandler, $action, $request, $next);
+            return call_user_func(self::$globalMiddlewareHandler, $action, $route, $request, $next);
         }
 
-        return call_user_func($action, $request, $next);
+        return call_user_func($action, $route, $request, $next);
     }
 
     /**
