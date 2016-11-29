@@ -15,17 +15,32 @@ use Nerd\Framework\Container\ContainerContract as Container;
 
 class Route implements RouteContract
 {
+    /**
+     * @var Matcher
+     */
     private $matcher;
 
+    /**
+     * @var callable
+     */
     private $action;
 
-    private $data;
+    /**
+     * @var array
+     */
+    private $middleware;
 
-    public function __construct(Matcher $matcher, callable $action, $data = null)
+
+    /**
+     * @param Matcher $matcher
+     * @param array $middleware
+     * @param callable $action
+     */
+    public function __construct(Matcher $matcher, array $middleware, callable $action)
     {
         $this->matcher = $matcher;
+        $this->middleware = $middleware;
         $this->action = $action;
-        $this->data = $data;
     }
 
     /**
@@ -37,11 +52,11 @@ class Route implements RouteContract
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getData()
+    public function getMiddleware(): array
     {
-        return $this->data;
+        return $this->middleware;
     }
 
     /**

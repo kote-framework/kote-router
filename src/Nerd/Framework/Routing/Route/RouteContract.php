@@ -8,7 +8,6 @@
 
 namespace Nerd\Framework\Routing\Route;
 
-use Nerd\Framework\Container\ContainerContract;
 use Nerd\Framework\Http\Request\RequestContract as Request;
 
 interface RouteContract
@@ -19,9 +18,9 @@ interface RouteContract
     public function getAction(): callable;
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getData();
+    public function getMiddleware(): array;
 
     /**
      * @param Request $request

@@ -4,7 +4,6 @@ namespace Nerd\Framework\Routing;
 
 use Nerd\Framework\Http\Request\RequestContract;
 use Nerd\Framework\Routing\Route\Matcher\MatcherBuilder;
-use Nerd\Framework\Routing\Route\Matcher\Matcher;
 use Nerd\Framework\Routing\Route\Route;
 use Nerd\Framework\Routing\Route\RouteContract;
 
@@ -23,13 +22,6 @@ class Router implements RouterContract
      * @var RouteContract[][]
      */
     private $routes = [];
-
-    /**
-     * List of registered middleware.
-     *
-     * @var array
-     */
-    private $middleware = [];
 
     /**
      * Route handler which will be invoked when router found route matching request.
@@ -77,34 +69,26 @@ class Router implements RouterContract
     }
 
     /**
-     * Add middleware to router.
-     *
-     * @param string $pattern
-     * @param callable $middleware
-     * @return Router
-     */
-    public function middleware(string $pattern, callable $middleware)
-    {
-        $matcher = $this->matcherBuilder->build($pattern);
-
-        $this->middleware[] = [$matcher, $middleware];
-
-        return $this;
-    }
-
-    /**
      * Add route into routes list.
      *
      * @param string|array $methods
      * @param string $pattern
-     * @param callable $action
-     * @param mixed $data
+     * @param callable[] ...$action
      * @return Router
      */
-    public function add(array $methods, string $pattern, callable $action, $data = null)
+    public function add(array $methods, string $pattern, callable ...$action)
     {
+        $actionSize = sizeof($action);
+
+        if ($actionSize == 0) {
+            throw new \BadMethodCallException("Action need to be specified.");
+        }
+
+        $action = end($action);
+        $middleware = array_slice($action, 0, $actionSize - 1);
+
         $matcher = $this->matcherBuilder->build($pattern);
-        $route = new Route($matcher, $action, $data);
+        $route = new Route($matcher, $middleware, $action);
 
         foreach ($methods as $method) {
             if (!array_key_exists($method, $this->routes)) {
@@ -121,69 +105,64 @@ class Router implements RouterContract
      * Add route for GET method into routes list.
      *
      * @param string $pattern
-     * @param callable $action
-     * @param mixed $data
+     * @param callable[] $action
      * @return Router
      */
-    public function get(string $pattern, callable $action, $data = null)
+    public function get(string $pattern, callable ...$action)
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["HEAD", "GET"], $matcher, $action, $data);
+        return $this->add(["HEAD", "GET"], $matcher, $action);
     }
 
     /**
      * Add route for POST method into routes list.
      *
      * @param string $pattern
-     * @param callable $action
-     * @param mixed $data
+     * @param callable[] $action
      * @return Router
      */
-    public function post(string $pattern, callable $action, $data = null)
+    public function post(string $pattern, callable ...$action)
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["POST"], $matcher, $action, $data);
+        return $this->add(["POST"], $matcher, $action);
     }
 
     /**
      * Add route for PUT method into routes list.
      *
      * @param string $pattern
-     * @param callable $action
-     * @param mixed $data
+     * @param callable[] $action
      * @return Router
      */
-    public function put(string $pattern, callable $action, $data = null)
+    public function put(string $pattern, callable ...$action)
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["PUT"], $matcher, $action, $data);
+        return $this->add(["PUT"], $matcher, $action);
     }
 
     /**
      * Add route for DELETE method into routes list.
      *
      * @param string $pattern
-     * @param callable $action
-     * @param mixed $data
+     * @param callable[] $action
      * @return Router
      */
-    public function delete(string $pattern, callable $action, $data = null)
+    public function delete(string $pattern, callable ...$action)
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(["DELETE"], $matcher, $action, $data);
+        return $this->add(["DELETE"], $matcher, $action);
     }
 
     /**
      * @param string $pattern
-     * @param callable $action
-     * @param null $data
+     * @param callable[] $action
      * @return Router
      */
-    public function any(string $pattern, callable $action, $data = null)
+    public function any(string $pattern, callable ...$action)
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
@@ -205,33 +184,29 @@ class Router implements RouterContract
             throw new RouteNotFoundException("Document {$request->getPath()} not found on this server.");
         }
 
-        $middleware = $this->findMiddleware($request);
-
-        return $this->cascadeMiddlewareWithRoute($middleware, $route, $request);
+        return $this->cascadeMiddlewareWithRoute($route, $request);
     }
 
     /**
      * Cascades middleware list with route action.
      *
-     * @param array $middleware
      * @param RouteContract $route
      * @param RequestContract $request
      * @return mixed
      */
-    private function cascadeMiddlewareWithRoute(array $middleware, RouteContract $route, RequestContract $request)
+    private function cascadeMiddlewareWithRoute(RouteContract $route, RequestContract $request)
     {
-        $invokeRoute = function () use ($route, $request) {
+        $invokeRoute = function ($request) use ($route) {
             return $this->invokeRoute($route, $request);
         };
 
-        $action = array_reduce(array_reverse($middleware), function ($first, $second) {
-            return function () use ($first, $second) {
-                list($middleware, $args) = $second;
-                return $this->invokeMiddleware($middleware, $first, $args);
+        $action = array_reduce(array_reverse($route->getMiddleware()), function ($first, $second) {
+            return function (RequestContract $request) use ($first, $second) {
+                return $this->invokeMiddleware($second, $request, $first);
             };
         }, $invokeRoute);
 
-        return call_user_func($action);
+        return call_user_func($action, $request);
     }
 
     /**
@@ -258,30 +233,6 @@ class Router implements RouterContract
     }
 
     /**
-     * Find middleware matching given path.
-     *
-     * @param RequestContract $request
-     * @return array
-     */
-    private function findMiddleware(RequestContract $request)
-    {
-        $path = $request->getPath();
-
-        $middleware = [];
-
-        /**
-         * @var Matcher $matcher
-         */
-        foreach ($this->middleware as list($matcher, $action)) {
-            if ($matcher->matches($path)) {
-                $middleware[] = [$action, $matcher->extractParameters($path)];
-            }
-        }
-
-        return $middleware;
-    }
-
-    /**
      * @param RouteContract $route
      * @param RequestContract $request
      * @return mixed
@@ -299,21 +250,17 @@ class Router implements RouterContract
 
     /**
      * @param callable $action
+     * @param RequestContract $request
      * @param callable $next
-     * @param array $args
      * @return mixed
-     * @throws RouterException
      */
-    private function invokeMiddleware($action, $next, array $args)
+    private function invokeMiddleware(callable $action, RequestContract $request, callable $next)
     {
         if (is_callable(self::$globalMiddlewareHandler)) {
-            return call_user_func(self::$globalMiddlewareHandler, $action, $args, $next);
+            return call_user_func(self::$globalMiddlewareHandler, $action, $request, $next);
         }
 
-        $values = array_values($args);
-        $values[] = $next;
-
-        return call_user_func_array($action, $values);
+        return call_user_func($action, $request, $next);
     }
 
     /**
@@ -324,6 +271,5 @@ class Router implements RouterContract
     public function clear()
     {
         $this->routes = [];
-        $this->middleware = [];
     }
 }

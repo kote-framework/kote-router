@@ -11,7 +11,7 @@
   ],
   "require": {
     "php": ">=7.0",
-    "nerd-framework/nerd-contracts": "dev-master"
+    "nerd-framework/nerd-contracts": "2.0.x-dev"
   },
   "require-dev": {
     "phpunit/phpunit": "~5.3",
