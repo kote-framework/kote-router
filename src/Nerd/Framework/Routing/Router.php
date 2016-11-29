@@ -105,7 +105,7 @@ class Router implements RouterContract
      * Add route for GET method into routes list.
      *
      * @param string $pattern
-     * @param callable[] $action
+     * @param callable[] ...$action
      * @return Router
      */
     public function get(string $pattern, callable ...$action)
@@ -119,7 +119,7 @@ class Router implements RouterContract
      * Add route for POST method into routes list.
      *
      * @param string $pattern
-     * @param callable[] $action
+     * @param callable[] ...$action
      * @return Router
      */
     public function post(string $pattern, callable ...$action)
@@ -133,7 +133,7 @@ class Router implements RouterContract
      * Add route for PUT method into routes list.
      *
      * @param string $pattern
-     * @param callable[] $action
+     * @param callable[] ...$action
      * @return Router
      */
     public function put(string $pattern, callable ...$action)
@@ -147,7 +147,7 @@ class Router implements RouterContract
      * Add route for DELETE method into routes list.
      *
      * @param string $pattern
-     * @param callable[] $action
+     * @param callable[] ...$action
      * @return Router
      */
     public function delete(string $pattern, callable ...$action)
@@ -159,14 +159,14 @@ class Router implements RouterContract
 
     /**
      * @param string $pattern
-     * @param callable[] $action
+     * @param callable[] ...$action
      * @return Router
      */
     public function any(string $pattern, callable ...$action)
     {
         $matcher = $this->matcherBuilder->build($pattern);
 
-        return $this->add(self::$availableMethods, $matcher, $action, $data);
+        return $this->add(self::$availableMethods, $matcher, $action);
     }
 
     /**
@@ -206,7 +206,7 @@ class Router implements RouterContract
             };
         }, $invokeRoute);
 
-        return call_user_func($action, $request);
+        return $action($request);
     }
 
     /**
