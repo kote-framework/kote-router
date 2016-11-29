@@ -15,6 +15,8 @@ use Nerd\Framework\Container\ContainerContract as Container;
 
 class Route implements RouteContract
 {
+    private $name = null;
+
     /**
      * @var Matcher
      */
@@ -41,6 +43,25 @@ class Route implements RouteContract
         $this->matcher = $matcher;
         $this->middleware = $middleware;
         $this->action = $action;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setName(string $name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**

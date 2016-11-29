@@ -26,6 +26,9 @@ abstract class Matcher implements MatcherContract
         $this->route = $route;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->route;
