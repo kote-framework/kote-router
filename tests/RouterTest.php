@@ -243,6 +243,5 @@ class RouterTest extends TestCase
 
         $this->assertEquals('foo', $router->handle($this->makeRequest('GET', 'some/foo/other')));
         $this->assertEquals('foo/bar', $router->handle($this->makeRequest('GET', 'some/foo/bar/other')));
-        $this->assertFalse('', $router->handle($this->makeRequest('GET', 'some/other')));
     }
 }
