@@ -74,7 +74,7 @@ class Router implements RouterContract
      * @param string|array $methods
      * @param string $pattern
      * @param callable[] ...$actions
-     * @return Router
+     * @return RouteContract
      */
     public function add(array $methods, string $pattern, callable ...$actions): RouteContract
     {
@@ -106,7 +106,7 @@ class Router implements RouterContract
      *
      * @param string $pattern
      * @param callable[] ...$action
-     * @return Router
+     * @return RouteContract
      */
     public function get(string $pattern, callable ...$action): RouteContract
     {
@@ -134,7 +134,7 @@ class Router implements RouterContract
      *
      * @param string $pattern
      * @param callable[] ...$action
-     * @return Router
+     * @return RouteContract
      */
     public function put(string $pattern, callable ...$action): RouteContract
     {
@@ -148,7 +148,7 @@ class Router implements RouterContract
      *
      * @param string $pattern
      * @param callable[] ...$action
-     * @return Router
+     * @return RouteContract
      */
     public function delete(string $pattern, callable ...$action): RouteContract
     {
@@ -160,7 +160,7 @@ class Router implements RouterContract
     /**
      * @param string $pattern
      * @param callable[] ...$action
-     * @return Router
+     * @return RouteContract
      */
     public function any(string $pattern, callable ...$action): RouteContract
     {
