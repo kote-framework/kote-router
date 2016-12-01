@@ -40,7 +40,8 @@ class ExtendedMatcher extends RegexMatcher
      */
     private function convertParameters(string $route): string
     {
-        $updatedRoute = preg_replace('/:([\w-_]+)/', '(?P<$1>.+?)', $route);
+        $updatedRoute = preg_replace('/::([^\/]+)/', '(?P<$1>.+?)', $route);
+        $updatedRoute = preg_replace('/:([^\/]+)/', '(?P<$1>[\w-]+)', $updatedRoute);
         $updatedRoute = preg_replace('/&([\w-_]+)/', '(?P<$1>[\d]+)', $updatedRoute);
 
         return $updatedRoute;

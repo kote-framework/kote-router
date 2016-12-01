@@ -233,4 +233,16 @@ class RouterTest extends TestCase
 
         Router::setGlobalMiddlewareHandler(null);
     }
+
+    public function testDoubleDotsRouteParam()
+    {
+        $router = new Router;
+        $router->get('some/::param/other', function ($param) {
+            return $param;
+        });
+
+        $this->assertEquals('foo', $router->handle($this->makeRequest('GET', 'some/foo/other')));
+        $this->assertEquals('foo/bar', $router->handle($this->makeRequest('GET', 'some/foo/bar/other')));
+        $this->assertFalse('', $router->handle($this->makeRequest('GET', 'some/other')));
+    }
 }
